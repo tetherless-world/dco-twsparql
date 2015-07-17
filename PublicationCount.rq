@@ -1,0 +1,14 @@
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+
+#
+#Counts the total number of publications on the DCO website
+#
+SELECT (concat("Total Publications ", (COUNT(?publication))) as ?number) WHERE
+{
+{ ?publication a bibo:Article . } 
+UNION { ?publication a bibo:Book . } 
+UNION { ?publication a bibo:DocumentPart . } 
+UNION { ?publication a dco:Poster . } 
+UNION { ?publication a bibo:Thesis . }
+}
