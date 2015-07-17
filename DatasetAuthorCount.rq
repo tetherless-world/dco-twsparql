@@ -1,0 +1,12 @@
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+#This query counts the number of dataset authors on the DCO website
+SELECT (concat("Total Dataset Authors: ", (COUNT (DISTINCT ?dataset))) as ?number) WHERE
+{
+?dataset a vivo:Dataset.
+?dataset vivo:relatedBy ?relatedIDs.
+?relatedIDs vivo:relates ?authors.
+?authors vitro:mostSpecificType foaf:Person.
+}

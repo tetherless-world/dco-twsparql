@@ -1,0 +1,10 @@
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+#
+#This query counts all DCO members
+#
+SELECT (concat("Total Members: ", (COUNT (DISTINCT ?user))) as ?number) WHERE
+{
+?user a foaf:Person;
+         <http://vivo.mydomain.edu/ns#networkId> ?netID.
+}
