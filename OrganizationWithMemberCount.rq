@@ -1,0 +1,11 @@
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+#This query counts the number of DCO organizations that have members
+#Note - This only counts for members, not all users. To count for all users, remove the ?netID line from the query.
+SELECT (concat("Total Organizations with Members: ", (COUNT (DISTINCT ?organization))) as ?number) WHERE
+{
+?user a foaf:Person;
+         <http://vivo.mydomain.edu/ns#networkId> ?netID.
+?user dco:inOrganization ?organization.
+}
