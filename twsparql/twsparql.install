@@ -1,0 +1,108 @@
+<?php
+// $Id$
+
+
+/**
+ * Implementation of hook_install()
+ */
+function twsparql_install() {
+  db_query("UPDATE {system} SET weight = 20 WHERE name = 'twsparql'");
+  drupal_install_schema('twsparql');
+  db_query("DELETE FROM {cache}");
+}
+
+/*
+function twsparql_update_6000(&$sandbox) {
+  drupal_install_schema('twsparql');
+}
+*/
+/*
+function twsparql_enable() {
+drupal_install_schema('twsparql');
+db_query("DELETE FROM {cache}");
+}*/
+/**
+ * Implementation of hook_uninstall()
+ */
+function twsparql_uninstall() {
+  drupal_uninstall_schema('twsparql');
+}
+/**
+ * Implementation of hook_schema()
+ * @return array of Schema API table definitions.
+ */
+function twsparql_schema() {
+  $schema = array();
+  $schema['twsparql_content_cache_queries'] = array(
+    'description' => 'Caches results of SPARQL queries for any queried {node}.',
+    'fields' => array(
+      'qid' => array(
+        'description' => 'The primary identifier for this query.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'nid' => array(
+        'description' => 'The {node} this result belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+      'query' => array(
+        'description' => 'The URI of the query which will be used to generate the data',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'normal'),
+      'endpoint' => array(
+        'description' => 'The endpoint to execute the xslt on',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'normal'),
+      'expires' => array(
+        'description' => 'The latest time at which the server should refresh the cache',
+        'type' => 'datetime',
+        'not null' => TRUE),
+      ),
+    'indexes' => array(
+      'nid' => array('nid')
+    ),
+    'primary key' => array('qid')
+  );
+  $schema['twsparql_content_cache_xslt'] = array( 
+    'description' => 'Caches the results of xslt transfomations from {qid}.',
+    'fields' => array(
+      'xid' => array(
+        'description' => 'The primary identifier for this xslt.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE),
+      'nid' => array(
+        'description' => 'The {node} this result belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+      'qid' => array(
+        'description' => 'The query this result belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+      'xslturi' => array(
+        'description' => 'The URI of the query which will be used to generate the data',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'normal'),
+      'value' => array(
+        'description' => 'The value of this version of the query with xslt transformation applied.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big')
+	  ),
+	'indexes' => array(
+    'nid' => array('nid'),
+	  'qid' => array('qid')
+  ),
+	'primary key' => array('xid')
+	);
+  return $schema;
+}

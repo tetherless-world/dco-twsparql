@@ -1,0 +1,23 @@
+<?php
+
+include_once("dco_common.php");
+
+if(isset($_GET["uri"])) {
+  $instance = "<" . sanitize($_GET["uri"],false) . ">";
+}
+else if(isset($_GET["i"])) {
+  $instance = "twi:" . sanitize($_GET["i"]);
+}
+else if(isset($_GET["s"])) {
+  $instance = "tw:" . sanitize($_GET["s"]);
+}
+else {
+  twerror();
+  $instance = "<?=\$instance?>" ;
+}
+
+header("Content-type: text/plain");
+?>
+
+describe <?=$instance?>
+

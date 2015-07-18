@@ -1,0 +1,60 @@
+td {
+	
+}
+tbody th {
+	border: none;
+	font-size: 90%;
+	padding:8px 8px 8px 0px;
+	text-transform: uppercase;
+	margin-top: 11px;
+	color: #8f928d;
+}
+table {
+    border-top: 1px solid #8f928d;
+    width: 100%;
+    margin-bottom: 2.1em;
+}
+td.title {
+	font-size: 145%;
+	font-weight: bold;
+	line-height: 1;
+	
+}
+td.update {
+	padding-top: 14px;
+	padding-left: 72px;
+	text-indent: -72px;
+	
+}
+td.desc, td.Name, td.Role, td.Institution, td.DCO_ID {
+	vertical-align: top;
+	padding-bottom: 7px;
+	padding-top: 2px;
+	padding-right: 7px;
+	line-height: 1.2;
+}
+
+
+td.desc {
+	text-align: justify;
+	padding: 10px 105px 10px 0px;
+	font-size: 100%;
+	line-height: normal;
+}
+
+td.Name {
+	font-weight: bold;
+	
+}
+td.Role {
+	font-size: 90%;
+	font-style:oblique;
+}
+td.Institution {
+	font-size: 90%;
+	width: 25%;
+}
+td.DCO_ID {
+	font-size: 90%;
+}
+

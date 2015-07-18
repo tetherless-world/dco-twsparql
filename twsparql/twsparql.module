@@ -1,0 +1,977 @@
+<?php
+// $Id$
+/**
+* @file
+* TW SPARQL Module.
+*/
+
+/*******************************************************************************
+* Hook Functions (Drupal)
+******************************************************************************/
+
+global $twsparql_last_rdf_document;
+global $twsparql_last_referer;
+global $twsparql_last_qid;
+global $twsparql_added_block_header;
+$twsparql_last_rdf_document = NULL;
+$twsparql_last_referer = NULL;
+$twsparql_last_qid = NULL;
+$twsparql_added_block_header = FALSE;
+
+
+/**
+ * Outputs the raw results of a SPARQL query
+ * see http://api.drupal.org/api/drupal/includes--file.inc/function/file_transfer/6
+ * @param $type The Content-Type of the results parameter
+ * @param $results The body of the results
+ */
+function twsparql_output_results($type, $results) {
+  if (ob_get_level()) {
+    ob_end_clean();
+  }
+
+  if (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on')) {
+    drupal_set_header('Cache-Control: private');
+    drupal_set_header('Pragma: private');
+  }
+
+  $type = preg_replace('/\r?\n(?!\t| )/', '', $type);
+  drupal_set_header("Content-Type: $type");
+  print $results;
+  exit();
+}
+
+/**
+* Display help and module information
+* @param path which path of the site we're displaying help
+* @param arg array that holds the current path as would be returned from arg() function
+* @return help text for the path
+*/
+function twsparql_help($path, $arg) {
+  $output = "";
+  switch ($path) {
+  case "admin/help/twsparql":
+    $output = '<p>'.  t("TW SPARQL module takes a special <sparql> tag and to generate HTML content using a SPARQL endpoint.") .'</p>';
+    break;
+  default:
+    $output = "";
+  }
+  return $output;
+}
+
+/**
+* Valid permissions for this module
+* @return array An array of valid permissions for the provenance module
+*/
+function twsparql_perm() {
+  return array('administer tw sparql','use external query interface');
+}
+
+/**
+* Menu for this module
+* @return array An array with this module's settings.
+*/
+function twsparql_menu() {
+  $items = array();
+
+  $items['admin/settings/twsparql'] = array(
+    'title' => 'TW SPARQL Settings',
+    'description' => 'Settings for the TW SPARQL module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('twsparql_admin_settings'),
+    'access arguments' => array('administer tw sparql'),
+    'type' => MENU_NORMAL_ITEM
+    );
+
+  $items['twsparql/query'] = array(
+    'title' => 'TW SPARQL Endpoint',
+    'description' => 'Executes SPARQL evaluations against the endpoint',
+    'page callback' => 'twsparql_external_query',
+    'access arguments' => array('use external query interface'),
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+function twsparql_external_query() {
+  $copy = $_GET;
+  $queryFile = $copy["query"];
+  $xsltFile = $copy["xslt"];
+
+  if(preg_match("/SELECT/i", $queryFile)>0) {
+    $url = twsparql_get_endpoint()."?query=".urlencode($queryFile);
+    $content = file_get_contents($url);
+    twsparql_output_results("application/sparql-results+xml", $content);
+    return;
+  }
+  else if(preg_match("/CONSTRUCT/i", $queryFile)>0) {
+    $url = twsparql_get_endpoint()."?query=".urlencode($queryFile);
+    $content = file_get_contents($url);
+    twsparql_output_results("application/rdf+xml", $content);
+    return;
+  }
+  else if(preg_match("/DESCRIBE/i", $queryFile)>0) {
+    $url = twsparql_get_endpoint()."?query=".urlencode($queryFile);
+    $content = file_get_contents($url);
+    twsparql_output_results("application/rdf+xml", $content);
+    return;
+  }
+  else if(preg_match("/ASK/i", $queryFile)>0) {
+    $url = twsparql_get_endpoint()."?query=".urlencode($queryFile);
+    $content = file_get_contents($url);
+    twsparql_output_results("text/plain", $content);
+    return;
+  }
+
+  $doc = new DOMDocument();
+  $xslt = new XSLTProcessor();
+
+  $str = twsparql_rfc_2396(twsparql_get_xsltpath(),$xsltFile)."?r=".urlencode($copy["uri"]);
+  $doc->substituteEntities = TRUE;
+  $doc->load($str);
+  $xslt->importStylesheet($doc);
+
+  $str = twsparql_rfc_2396(twsparql_get_querypath(),$queryFile)."?";
+  unset($copy["q"]);
+  unset($copy["query"]);
+  unset($copy["xslt"]);
+  $first = TRUE;
+  foreach($copy as $idx => $val) {
+    $str .= ($first ? "" : "&")."$idx=".urlencode($val);
+    $first = FALSE;
+  }
+  $queryText = file_get_contents($str);
+  $doc->substituteEntities = TRUE;
+  $doc->load(twsparql_get_endpoint()."?query=".urlencode($queryText));
+  $str = $xslt->transformToXML($doc);
+
+  if(strpos($str,"<sparql")!==FALSE)
+    twsparql_output_results("application/sparql-results+xml",$str);
+  else if(strpos($str,"<rdf:RDF")!==FALSE)
+    twsparql_output_results("application/rdf+xml",$str);
+  else if(strpos($str,"<?xml")!==FALSE)
+    twsparql_output_results("text/xml",$str);
+  else if(strpos($str,"<html")!==FALSE)
+    twsparql_output_results("text/html",$str);
+  else
+    twsparql_output_results("text/plain",$str);
+}
+
+function twsparql_nodeapi(&$node,$op,$a3=NULL,$a4=NULL){
+  switch($op) {
+  case 'presave':
+  case 'delete':
+    $nid = $node->nid;
+    $result = db_query("DELETE FROM {twsparql_content_cache_queries} WHERE nid = %d",$nid);
+    $result = db_query("DELETE FROM {twsparql_content_cache_xslt} WHERE nid = %d",$nid);
+    break;
+  case 'update':
+  case 'insert':
+    break;
+  case 'view':
+    if(twsparql_debug_enabled())
+      drupal_set_message("*****STARTING A VIEW QUERY*****",'warning');
+    $node->content["body"]["#value"] = twsparql_sparql($node->content["body"]["#value"], $node->nid);
+    $node->content["body"]["#value"] .= "<script type=\"text/javascript\">window.twsparql = \"".base_path()."twsparql/query\";</script>";
+    break;
+  case 'save':
+    break;
+  }
+}
+
+function twsparql_sparql($content, $nid = NULL) {
+  if(twsparql_debug_enabled())
+    drupal_set_message("*****STARTING A NEW QUERY*****.",'warning');
+  $newContent = "";
+  // Match script tag
+  $matches = array();
+  if(0<preg_match_all("/(<p>)?<sparql(([^\/>]*(\/[^>])?)*)(\/>|>(([^<]*(<[^\/])?)*)<\/sparql>)(<\/p>|<br \/>)?/",$content,$matches,PREG_OFFSET_CAPTURE)) {
+    $start = microtime(TRUE);
+    $params = twsparql_parse_params($matches);
+    $end = microtime(TRUE);
+    if(twsparql_debug_enabled())
+      drupal_set_message("Processing SPARQL parameters took ".(($end-$start)*1000)." milliseconds.",'warning');
+    $start = 0;
+    foreach($params as $desc) {
+      $newContent .= substr($content,$start,$desc["startChar"]-$start);
+      //$newContent .= twsparql_get_sparql_result($desc);
+      $newContent .= twsparql_get_sparql_result_cached($desc, $nid);
+      $start = $desc["endChar"];
+    }
+    $content = $newContent . substr($content,$start);
+  }
+  return preg_replace("/<\/sparql>(<\/p>)?/","",$content);
+}
+
+function twsparql_parse_params($matches) {
+  $params = array();
+
+  $tagText = $matches[0];
+  $paramText = $matches[2];
+  $queryText = $matches[6];
+
+  for($i=0;$i<count($tagText);$i++) {
+    $text = $tagText[$i];
+    $desc = array();
+    $desc["startChar"] = $text[1];
+    $desc["length"] = strlen($text[0]);
+    $desc["endChar"] = $desc["startChar"] + $desc["length"];
+    $desc["endpoint"] = null;
+    $desc["query"] = null;
+    $desc["uri"] = null;
+    $desc["i"] = null;
+    $desc["s"] = null;
+    $desc["form"] = null;
+    $desc["query-text"] = null;
+    $desc["xslt"] = null;
+    $desc["offset"] = null;
+    $desc["limit"] = null;
+    $desc["other"] = null;
+    $pairs = array();
+    $count = preg_match_all("/([[:alpha:]]*)=\"([^\"]*)\"/",$paramText[$i][0],$pairs);
+    for($j=0;$j<$count;$j++) {
+      switch($pairs[1][$j]) {
+      case "endpoint":
+        $desc["endpoint"] = $pairs[2][$j];
+        break;
+      case "query":
+        $desc["query"] = $pairs[2][$j];
+        break;
+      case "uri":
+        $desc["uri"] = $pairs[2][$j];
+        break;
+      case "i":
+        $desc["uri"] = twsparql_rfc_2396(twsparql_get_ibase(),$pairs[2][$j]);
+        break;
+      case "s":
+        $desc["uri"] = twsparql_rfc_2396(twsparql_get_sbase(),$pairs[2][$j]);
+        break;
+      case "form":
+        $desc["form"] = $pairs[2][$j];
+        break;
+      case "xslt":
+        $desc["xslt"] = $pairs[2][$j];
+        break;
+      case "expire":
+        $desc["expire"] = $pairs[2][$j];
+        break;
+      case "offset":
+	$desc["offset"] = $pairs[2][$j];
+	break;
+      case "limit":
+	$desc["limit"] = $pairs[2][$j];
+	break;
+      }
+    }
+    if(!isset($desc["uri"]) || $desc["uri"] == "")
+    {
+	if(isset($_GET["uri"]))
+	{
+	    $desc["uri"] = $_GET["uri"];
+	}
+    }
+    foreach( $_GET as $gkey => $gval )
+    {
+        if( $gkey != "uri" )
+        {
+            if( $desc["other"] == null )
+            {
+                $desc["other"] = array() ;
+            }
+            $desc["other"][$gkey] = $gval ;
+        }
+    }
+    if(!isset($queryText[$i])) { }
+    else if(!is_array($queryText[$i]) && strlen($queryText[$i])>0) {
+      $desc["query-text"] = $queryText[$i];
+    }
+    else if(is_array($queryText[$i]) && strlen($queryText[$i][0])>0) {
+      $desc["query-text"] = $queryText[$i][0];
+    }
+    $params[] = $desc;
+  }
+
+  return $params;
+}
+
+function twsparql_get_sparql_result_cached($params, $nid) {
+  global $twsparql_last_rdf_document, $twsparql_last_qid;
+  if(!twsparql_get_cache_enabled()) {
+    return twsparql_get_sparql_result($params);
+  }
+  if($params["query"]==null && $params["query-text"]==null &&
+    !$twsparql_last_qid) {
+    return "<p>TW SPARQL Error: No query specified</p>";
+  }
+
+  if($nid == NULL) {
+    return twsparql_get_sparql_result($params);
+  }
+
+  //find out if query is in the database
+  $queryText=FALSE;
+  $queryURI=FALSE;
+  if($params["query"]) {
+    $queryText = twsparql_get_query_text($params, $queryURI);
+    if(!$queryText) {
+      return "<p>TW SPARQL Error: 404 Query not found</p>";
+    }
+  }
+  else if($params["query-text"]) {
+    $queryText = $params["query-text"];
+    $queryURI = $queryText;
+  }
+
+  $qid = FALSE;
+  $rdf = NULL;
+  if($queryURI) {
+    $endpoint = $params["endpoint"]?$params["endpoint"] : twsparql_get_endpoint();
+    $result = db_query("SELECT qid, (expires < NOW()) AS expired FROM {twsparql_content_cache_queries} WHERE query=\"%s\" AND endpoint=\"%s\" AND nid = %d",$queryURI,$endpoint, $nid);
+    $item=db_fetch_object($result);
+    $qid = $item->qid;
+    $expired = $item->expired;
+    //if this is a new entry
+    if(!$qid) {
+      $error = twsparql_get_query_result($params, $queryText, $rdf);
+      if($error) {
+        return $error;
+      }
+      $expires = twsparql_get_expiration($params);
+      $result=db_query("INSERT INTO {twsparql_content_cache_queries}(nid, query, endpoint, expires) VALUES(%d, \"%s\", \"%s\", DATE_ADD(NOW(),INTERVAL %s))",$nid,$queryURI,$endpoint,$expires);
+      $result=db_query("SELECT LAST_INSERT_ID() AS qid;");
+      $item = db_fetch_object($result);
+      $qid = $item->qid;
+      //$twsparql_last_rdf_document = $rdf;
+    } else if($expired) {
+      //if the entry has expired update everything
+      $error = twsparql_get_query_result($params, $queryText, $rdf);
+      if($error) {
+        return $error;
+      }
+      $expires = twsparql_get_expiration($params);
+      db_query("BEGIN");
+      $result=db_query("UPDATE {twsparql_content_cache_queries} SET expires=DATE_ADD(NOW(),INTERVAL %s) WHERE qid = %d",$expires,$qid);
+      //do all the work to fix stuff
+      $result=db_query("SELECT xid, xslturi FROM {twsparql_content_cache_xslt} WHERE qid=%d",$qid);
+      $xsltURI = twsparql_make_XSLTuri($params, $queryText);
+      if(twsparql_debug_enabled())
+        drupal_set_message("Using xsl uri $xsltURI",'warning');
+      while($item = db_fetch_object($result)) {
+        $xsltURI = $item->xslturi;
+        $xid = $item->xid;
+        $xhtml = NULL;
+        $error = twsparql_process_xslt($xsltURI, $rdf, $xhtml);
+        if($error) {
+          return $error;
+        }
+        $temp = db_query("UPDATE {twsparql_content_cache_xslt} SET value=\"%s\" WHERE xid=%d",$xhtml,$xid);
+      }
+      db_query("COMMIT");
+    }
+    $twsparql_last_qid = $qid;
+  } else {
+    $qid = $twsparql_last_qid;
+    $result = $twsparql_last_rdf_document;
+    if($result) {
+      $rdf = new DOMDocument();
+      $rdf->substituteEntities = TRUE;
+      if(!$rdf->loadXML($result)) {
+        return print_r($params,TRUE)."<p>testTW SPARQL Error 1: SPARQL Endpoint did not return a valid XML document</p>";
+      }
+    }
+  }
+
+  //time to get the xslt
+  $xsltURI = twsparql_make_XSLTuri($params, $queryText);
+  $result = db_query("SELECT value FROM {twsparql_content_cache_xslt} WHERE qid=%d AND xslturi=\"%s\"",$qid,$xsltURI);
+  $item=db_fetch_object($result);
+  $value = $item->value;
+  if(!$value) {
+    $xhtml = NULL;
+    if(!$rdf) {
+      $error = twsparql_get_query_result($params, $queryText, $rdf);
+      if($error) {
+        return $error;
+      }
+    }
+    $error = twsparql_process_xslt($xsltURI, $rdf, $xhtml);
+    if($error) {
+      return $error;
+    }
+    $result=db_query("INSERT INTO {twsparql_content_cache_xslt} (nid, qid,xslturi,value) VALUES(%d,%d,\"%s\",\"%s\")",$nid,$qid,$xsltURI,$xhtml);
+    twsparql_process_links($xhtml);
+    $value = $xhtml;
+  }
+  twsparql_process_links($value);
+  return $value;
+}
+
+function twsparql_get_expiration(&$params) {
+  $expireStr = $params["expire"];
+  if(!$expireStr) {
+    $expireStr = twsparql_get_cache_expires();
+  }
+  $expireParam = explode(' ',$expireStr);
+  $expire = "";
+  $value = $expireParam[0];
+  switch ($expireParam[1]) {
+  case 'D' :
+  case 'd' :
+    $expire = $value . " DAY";
+    break;
+  case 'H' :
+  case 'h' :
+    $expire = $value . " HOUR";
+    break;
+  case 'M' :
+  case 'm' :
+    $expire = $value . " MINUTE";
+    break;
+  }
+  return $expire;
+}
+
+function twsparql_make_XSLTuri(&$params, $queryText) {
+  global $twsparql_last_referer;
+
+  $xsltURI = $params["xslt"]?$params["xslt"]:twsparql_get_xslt();
+  if(FALSE===strpos("http://",$xsltURI)) {
+    $xsltURI = twsparql_rfc_2396(twsparql_get_xsltpath(),$xsltURI);
+  }
+  if($params["uri"]) {
+    if($queryText)
+      $twsparql_last_referer = urlencode($params["uri"]);
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+  else if($params["i"]) {
+    if($queryText)
+      $twsparql_last_referer = urlencode(twsparql_rfc_2396(twsparql_get_ibase(),$params["i"]));
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+  else if($params["s"]) {
+    if($queryText)
+      $twsparql_last_referer = urlencode(twsparql_rfc_2396(twsparql_get_sbase(),$params["s"]));
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+  else if($twsparql_last_referer) {
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+  return $xsltURI;
+}
+
+function twsparql_process_xslt($xsltURI, $rdf, &$xhtml) {
+  $xslt = new DOMDocument();
+  $xslt->substituteEntities = TRUE;
+  if(!$xslt->load($xsltURI)) {
+    return "<p>TW SPARQL Error: Unable to load the XSL file $xslt</p>";
+  }
+
+  $start = microtime(TRUE);
+  $proc = new XSLTProcessor();
+  if(twsparql_get_phpext()) {
+    $proc->registerPHPFunctions();
+  }
+  $proc->importStylesheet($xslt);
+
+  $xhtml = $proc->transformToXML($rdf);
+
+  if(!$xhtml) {
+    return "<p>TW SPARQL Error: XSL Transformation failed. Check the error logs for more info.</p>";
+  }
+  $end = microtime(TRUE);
+  if(twsparql_debug_enabled())
+    drupal_set_message("XSL Transformation in process_xslt took ".(($end-$start)*1000)." msec.",'warning',TRUE);
+
+  return NULL;
+}
+
+function twsparql_process_links(&$xhtml) {
+  $links = preg_match_all("/<link([^>]*)>/",$xhtml,$matches);
+  if($links) {
+    foreach($matches[1] as $link)
+      drupal_set_html_head("<link".$link.">");
+  }
+  $xhtml = preg_replace("/<link([^>]*)>/","",$xhtml);
+  $xhtml = preg_replace("/<\?[^?]*\?>/","",$xhtml);
+}
+
+function twsparql_perform_query($query, $endpoint=NULL) {
+  if($endpoint==NULL) $endpoint = twsparql_get_endpoint();
+  $ctx = stream_context_create(array('http' => array("method" => "POST",
+  "header" => "Accept: application/sparql-results+json")));
+  $endpoint .= "?query=".urlencode($query);
+  $result = @file_get_contents($endpoint,false,$ctx);
+  if($result==FALSE) return array();
+  $result = json_decode($result, TRUE);
+  $bindings = $result["results"]["bindings"];
+  $result = array();
+  foreach($bindings as $binding) {
+    $temp = array();
+    foreach($binding as $var => $val) {
+      $temp[$var] = $val["value"];
+    }
+    $result[] = $temp;
+  }
+  return $result;
+}
+
+function twsparql_get_query_result($params, $queryText, &$rdf) {
+  global $twsparql_last_rdf_document;
+
+  if($queryText) {
+    $endpoint = isset($params["endpoint"])?
+      $params["endpoint"] : twsparql_get_endpoint();
+
+    // The endpoint could require specific formatting options as part of its
+    // URL. So see if a question mark already exists in the endpoint
+    // definition. If so, add query as an additional parameter using $,
+    // otherwise query will be the first part of the query string using ?
+    $question = strrpos( $endpoint, "?" ) ;
+    if( $question != FALSE )
+	    $endpoint .= "&" ;
+    else
+	    $endpoint .= "?" ;
+
+    $endpoint .= "query=".urlencode($queryText);
+    $start = microtime(TRUE);
+    $result = file_get_contents($endpoint);
+    $end = microtime(TRUE);
+    if(twsparql_debug_enabled())
+      drupal_set_message("SPARQL Endpoint took ".(($end-$start)*1000)." msec to return results.",'warning',TRUE);
+    if($result==FALSE) {
+      return "<p>TW SPARQL Error: SPARQL Endpoint did not return any content.</p>";
+    }
+    $twsparql_last_rdf_document = $result;
+    $rdf = new DOMDocument();
+    $rdf->substituteEntities = TRUE;
+    if(!$rdf->loadXML($result)) {
+      return "<p>TW SPARQL Error 2: SPARQL Endpoint did not return a valid XML document.</p>";
+    }
+  }
+  else {
+    $result = $twsparql_last_rdf_document;
+    $rdf = new DOMDocument();
+    $rdf->substituteEntities = TRUE;
+    if(!$rdf->loadXML($result)) {
+      return print_r($params,TRUE)."<p>TW SPARQL Error: An error occured during XSL transformation.</p>";
+    }
+  }
+  return NULL;
+}
+
+
+function twsparql_get_sparql_result($params) {
+  global $twsparql_last_rdf_document, $twsparql_last_referer;
+
+  if($params["query"]==null && $params["query-text"]==null &&
+     !$twsparql_last_rdf_document) {
+    return "<p>TW SPARQL Error: No query specified</p>";
+  }
+
+  $queryText=FALSE;
+  if($params["query"]) {
+    $dummyVar = "";
+    $queryText = twsparql_get_query_text($params, $dummyVar);
+    if(!$queryText) {
+      return "<p>TW SPARQL Error: 404 Query not found</p>";
+    }
+  }
+  else if($params["query-text"]) {
+    $queryText = $params["query-text"];
+  }
+  if(twsparql_debug_enabled())
+    drupal_set_message("queryText = ".$queryText.".",'warning');
+  if(twsparql_debug_enabled())
+    drupal_set_message("queryText = ".urlencode($queryText).".",'warning');
+
+  if($queryText) {
+    $endpoint = $params["endpoint"]?
+      $params["endpoint"] : twsparql_get_endpoint();
+
+	// The endpoint could require specific formatting options as part of its
+	// URL. So see if a question mark already exists in the endpoint
+	// definition. If so, add query as an additional parameter using $,
+	// otherwise query will be the first part of the query string using ?
+	$question = strrpos( $endpoint, "?" ) ;
+	if( $question != FALSE )
+		$endpoint .= "&" ;
+	else
+		$endpoint .= "?" ;
+
+    $endpoint .= "query=".urlencode($queryText);
+
+    if(twsparql_debug_enabled())
+      drupal_set_message("endpoint = ".$endpoint,'warning');
+    $start = microtime(TRUE);
+
+	// This is a problem with the VIVO endpoint, not the sparql module. Have
+	// to remove any Accept header information for requests to
+	// info.deepcarbon.net vivo endpoint
+	$pos = strpos( $endpoint, "http://info.deepcarbon.net/vivo" ) ;
+	if( $pos == 0 )
+	{
+		$ctx = stream_context_create(array('http' => array("method" => "GET")));
+	}
+	else
+	{
+		$ctx = stream_context_create(array('http' => array("method" => "GET",
+					 "header" => "Accept: application/sparql-results+json, application/sparql-results+xml, application/rdf+xml")));
+	}
+
+    $result = @file_get_contents($endpoint,false,$ctx);
+    $end = microtime(TRUE);
+    if(twsparql_debug_enabled())
+	{
+	  drupal_set_message("result = ".$result, 'warning') ;
+      drupal_set_message("SPARQL Endpoint took ".(($end-$start)*1000)." msec to return results.",'warning',TRUE);
+	}
+    if($result==FALSE) {
+      return "<p>TW SPARQL Error 3: SPARQL Endpoint did not return a valid XML document</p>";
+    }
+    $twsparql_last_rdf_document = $result;
+    //drupal_set_message("result = ".htmlspecialchars($result),'warning',TRUE);
+    $rdf = new DOMDocument();
+    $rdf->substituteEntities = TRUE;
+    if(!$rdf->loadXML($result)) {
+      return "<p>TW SPARQL Error 4: SPARQL Endpoint did not return a valid XML document</p>";
+    }
+  }
+  else {
+    $result = $twsparql_last_rdf_document;
+    $rdf = new DOMDocument();
+    $rdf->substituteEntities = TRUE;
+    if(!$rdf->loadXML($result)) {
+      return print_r($params,TRUE)."<p>testTW SPARQL Error 5: SPARQL Endpoint did not return a valid XML document</p>";
+    }
+  }
+
+  $xsltURI = $params["xslt"]?$params["xslt"]:twsparql_get_xslt();
+  if(FALSE===strpos("http://",$xsltURI)) {
+    $xsltURI = twsparql_rfc_2396(twsparql_get_xsltpath(),$xsltURI);
+  }
+  if($params["uri"]) {
+    if($queryText)
+      $twsparql_last_referer = urlencode($params["uri"]);
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+  else if($params["i"]) {
+    if($queryText)
+      $twsparql_last_referer = urlencode(twsparql_rfc_2396(twsparql_get_ibase(),$params["i"]));
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+  else if($params["s"]) {
+    if($queryText)
+      $twsparql_last_referer = urlencode(twsparql_rfc_2396(twsparql_get_sbase(),$params["s"]));
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+  else if($twsparql_last_referer) {
+    $xsltURI .= "?r=".$twsparql_last_referer;
+  }
+
+  if(twsparql_debug_enabled())
+    drupal_set_message("xsltURI = ".$xsltURI.".",'warning');
+  $xslt = new DOMDocument();
+  $xslt->substituteEntities = TRUE;
+  if(!$xslt->load($xsltURI)) {
+    return "<p>TW SPARQL Error: Unable to load the XSL file $xsltURI</p>";
+  }
+
+  $start = microtime(TRUE);
+  $proc = new XSLTProcessor();
+  if(twsparql_get_phpext()) {
+    $proc->registerPHPFunctions();
+  }
+  $proc->importStylesheet($xslt);
+  $xhtml = $proc->transformToXML($rdf);
+
+  if(!$xhtml) {
+    return "<p>TW SPARQL Error: XSL Transformation failed. Check the error logs for more info.</p>";
+  }
+
+  $links = preg_match_all("/<link([^>]*)>/",$xhtml,$matches);
+  if($links) {
+    foreach($matches[1] as $link)
+      drupal_set_html_head("<link".$link.">");
+  }
+  $xhtml = preg_replace("/<link([^>]*)>/","",$xhtml);
+  $end = microtime(TRUE);
+  if(twsparql_debug_enabled())
+    drupal_set_message("XSL Transformation in get_sparql_result took ".(($end-$start)*1000)." msec.",'warning',TRUE);
+  $returnValue = preg_replace("/<\?[^?]*\?>/","",$xhtml);
+  return $returnValue;
+}
+
+include_once('common/HttpUri.inc');
+
+function twsparql_rfc_2396($base,$path) {
+  if(0===strpos($path,"doi:")) {
+    $path = "http://dx.doi.org/".substr($path, 4);
+  }
+  return HttpUri::parse($base)->resolve($path)->serialize();
+  /*
+  if(0===strpos($path,"#")) {
+    if($pos=strpos($base,"#")) {
+      return substr($base,0,$pos).$path;
+    }
+  }
+  if($pos=strpos($base,"?")) {
+    $base = substr($base,0,$pos);
+  }
+  if(FALSE===($pos=strpos($base,"/",7))) {
+    if(0===strpos($path,"/"))
+      return $base.$path;
+    return $base."/".$path;
+  }
+  else {
+    $scheme = substr($base,0,$pos);
+    $oldPath = substr($base,$pos);
+    if(strrpos($oldPath,"/")==strlen($oldPath)-1)
+      $newPath = $oldPath . $path;
+    else {
+      $newPath = substr($oldPath,0,strrpos($oldPath,"/")+1).$path;
+    }
+    $parts = explode("/",$newPath);
+    while(in_array("..",$parts)||in_array(".",$parts)) {
+      for($i=0;$i<count($parts);$i++) {
+	if(isset($parts[$i])) {
+	  if($parts[$i]=='.') {
+	    unset($parts[$i]);
+	    break;
+	  }
+	  else if($parts[$i]=='..') {
+	    unset($parts[$i-1]);
+	    unset($parts[$i]);
+	    break;
+	  }
+	}
+      }
+      $parts = array_values($parts);
+    }
+    return $scheme.implode("/",$parts);
+  }
+   */
+}
+
+function twsparql_get_query_text($params, &$path) {
+  $path = $params["query"];
+  if(0!==strpos($path,"http://")) {
+    $path = twsparql_rfc_2396(twsparql_get_querypath(),$path);
+  }
+  if($params["uri"]) {
+    $path .= "?uri=".urlencode($params["uri"]);
+  }
+  else if($params["i"]) {
+    $path .= "?i=".urlencode($params["i"]);
+  }
+  else if($params["s"]) {
+    $path .= "?s=".urlencode($params["s"]);
+  }
+  if($params["limit"]!=null)
+    $path .= (strpos($path,"?")===FALSE ? "?" : "&")."limit=".$params["limit"];
+  if($params["offset"]!=null)
+    $path .= (strpos($path,"?")===FALSE ? "?" : "&")."offset=".$params["offset"];
+  if($params["other"]!=null)
+  {
+    foreach( $params["other"] as $okey => $oval )
+    {
+      $path .= (strpos($path,"?")===FALSE ? "?" : "&")."$okey=".$oval;
+    }
+  }
+  if(twsparql_debug_enabled())
+    drupal_set_message("Using query file $path",'warning');
+  $query = @file_get_contents($path);
+  return $query;
+}
+
+/**
+* TW SPARQL Configure
+* @return array An array of form data.
+*/
+function twsparql_admin_settings() {
+  $form = array();
+
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Settings'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE);
+
+  $form['settings']['twsparql_endpoint'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default SPARQL Endpoint'),
+    '#default_value' => twsparql_get_endpoint(),
+    '#maxlength' => 2048,
+    '#required' => TRUE,
+    '#description' => t('If a &lt;sparql&gt; tag does not specify an endpoint, this path will be used instead.')
+    );
+
+  $form['settings']['twsparql_xslt'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default XSL Transform'),
+    '#default_value' => twsparql_get_xslt(),
+    '#maxlength' => 2048,
+    '#required' => TRUE,
+    '#description' => t('If a &lt;sparql&gt; tag does not specify an XSL transformation, this file will be used instead.')
+    );
+
+  $form['settings']['twsparql_querypath'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Relative Path to Named Queries'),
+    '#default_value' => twsparql_get_querypath(),
+    '#maxlength' => 2048,
+    '#required' => TRUE,
+    '#description' => t('When a relative path to a named query is given, this path will be used to resolve it')
+    );
+
+  $form['settings']['twsparql_xsltpath'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Relative path to XSL Transforms'),
+    '#default_value' => twsparql_get_xsltpath(),
+    '#maxlength' => 2048,
+    '#required' => TRUE,
+    '#description' => t('When a relative path to an XSL transform is specified, this path will be used to resolve it')
+    );
+
+  $form['settings']['twsparql_ibase'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Base URI for Instances'),
+    '#default_value' => twsparql_get_ibase(),
+    '#maxlength' => 2048,
+    '#required' => TRUE,
+    '#description' => t('The base path for any items specified using the i= attribute')
+    );
+
+  $form['settings']['twsparql_sbase'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Base URI for Schema'),
+    '#default_value' => twsparql_get_sbase(),
+    '#maxlength' => 2048,
+    '#required' => TRUE,
+    '#description' => t('The base path for any items specified using the s= attribute')
+    );
+
+  $form['settings']['twsparql_phpext'] = array(
+    '#type' => 'radios',
+    '#title' => t('Enable PHP XSLT Extensions'),
+    '#default_value' => (int)(twsparql_get_phpext()),
+    '#options' => array(FALSE=>t('Disabled'),TRUE=>t('Enabled')),
+    '#description' => t('Enables PHP extensions in the XSLT processor, allowing stylesheets to make calls to PHP functions. Enable with caution.')
+    );
+
+  $form['settings']['twsparql_cache_enabled'] = array(
+    '#type' => 'radios',
+    '#title' => t('Enable Caching'),
+    '#default_value' => twsparql_get_cache_enabled(),
+    '#options' => array(FALSE=>t('Disabled'),TRUE=>t('Enabled')),
+    '#description' => t('Enables query caching.')
+    );
+
+  $form['settings']['twsparql_cache_expires'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default expiration time'),
+    '#default_value' => twsparql_get_cache_expires(),
+    '#maxlength' => 6,
+    '#description' => t('Sets the default expiration time.  The format is X Y where X is a number and Y is either D for Day, H for Hour or M for minute')
+    );
+
+  $form['settings']['twsparql_cache_clear'] = array(
+    '#type' => 'submit',
+    '#value' => 'Clear Cache',
+    '#submit' => array('twsparql_cache_clear'),
+    '#description' => t('Clears the cache.')
+    );
+
+  $form['settings']['twsparql_debug'] = array(
+    '#type' => 'radios',
+    '#title' => t('Enable Debug Output'),
+    '#default_value' => twsparql_debug_enabled(),
+    '#options' => array(FALSE=>t('Disabled'),TRUE=>t('Enabled')),
+    '#description' => t('Outputs debugging information regarding SPARQL queries and XSLT transformations.')
+    );
+
+  return array_merge_recursive(system_settings_form($form), array('#theme' => 'twsparql_admin_settings', 'buttons' => array('#weight' => 99)));
+}
+
+function twsparql_admin_settings_validate($form, &$form_state) {
+}
+
+function theme_twsparql_admin_settings($form) {
+}
+
+function twsparql_get_cache_enabled() {
+  return variable_get('twsparql_cache_enabled', TRUE);
+}
+
+function twsparql_cache_clear() {
+  $result = db_query("DELETE FROM {twsparql_content_cache_queries}");
+  $result = db_query("DELETE FROM {twsparql_content_cache_xslt}");
+  drupal_set_message('Cache cleared','status');
+}
+
+function twsparql_get_cache_expires() {
+  return variable_get('twsparql_cache_expires', '1 D');
+}
+
+function twsparql_get_endpoint() {
+  return variable_get('twsparql_endpoint','http://example.com/sparql');
+}
+
+function twsparql_get_xslt() {
+  return variable_get('twsparql_xslt','http://example.com/default.xsl');
+}
+
+function twsparql_get_querypath() {
+  return variable_get('twsparql_querypath','http://example.com/query/');
+}
+
+function twsparql_get_xsltpath() {
+  return variable_get('twsparql_xsltpath','http://example.com/xsl/');
+}
+
+function twsparql_get_ibase() {
+  return variable_get('twsparql_ibase','http://example.com/instances/');
+}
+
+function twsparql_get_sbase() {
+  return variable_get('twsparql_sbase','http://example.com/schema/');
+}
+
+function twsparql_get_phpext() {
+  return variable_get('twsparql_phpext',FALSE);
+}
+
+function twsparql_debug_enabled() {
+  return variable_get('twsparql_debug',FALSE);
+}
+
+function twsparql_block($op = 'list', $delta = 0, $edit = array()) {
+  global $twsparql_added_block_header;
+  if(twsparql_debug_enabled())
+    drupal_set_message("*****STARTING A BLOCK QUERY*****",'warning');
+  $data = block_block($op, $delta, $edit);
+  switch($op) {
+  case 'view':
+    $data['content'] = twsparql_sparql($data['content'], $delta);
+    if(!$twsparql_added_block_header)
+      drupal_set_html_head('<link href="/css/block.css" rel="stylesheet" type="text/css"/>');
+    $twsparql_added_block_header = TRUE;
+    break;
+  case 'list':
+    foreach($data as $bid => $block) {
+      $block['info'] .= " (w/ SPARQL)";
+      $data[$bid] = $block;
+    }
+    break;
+  case 'configure':
+  case 'save':
+    break;
+  }
+  return $data;
+}
+
+function twsparql_views_post_render(&$view, &$output, &$cache) {
+    if( arg(0) == 'node' && is_numeric( arg(1) ) ) $nodeid = arg(1) ;
+    else $nodeid = 0 ;
+    $output = twsparql_sparql( $output, $nodeid ) ;
+}

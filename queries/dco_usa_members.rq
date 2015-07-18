@@ -1,0 +1,31 @@
+<?php
+header("Content-type: text/plain");
+?>
+
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+
+SELECT ?name (group_concat(distinct ?networkID;separator=", ") as ?networkIDs) (group_concat(distinct ?email;separator=", ") as ?emails) (group_concat(distinct ?community;separator=", ") as ?communities) (group_concat(distinct ?organization;separator=", ") as ?organizations) (group_concat(distinct ?language;separator=", ") as ?languages) (group_concat(distinct ?project;separator="; ") as ?projects_or_field_studies)
+
+WHERE
+  {  ?vivoID <http://vivo.mydomain.edu/ns#networkId> ?networkID ;
+          rdfs:label ?name ;
+          dco:inOrganization ?orgID .
+  OPTIONAL { ?vivoID obo:ARG_2000028 [vcard:hasEmail ?emailNode] .
+                     ?emailNode vcard:email ?email . }
+  OPTIONAL {?vivoID dco:associatedDCOCommunity [rdfs:label ?community]}
+  OPTIONAL {?vivoID dco:inLanguage ?language}
+  OPTIONAL {?vivoID obo:RO_0000053 ?projectRole .
+            ?projectRole obo:BFO_0000054 [rdfs:label ?project] .}
+  ?orgID obo:RO_0001025
+  <http://aims.fao.org/aos/geopolitical.owl#United_States_of_America> ;
+         obo:RO_0001025 ?country .
+  ?orgID rdfs:label ?organization .
+} GROUP BY ?name
+ORDER BY ?name
+

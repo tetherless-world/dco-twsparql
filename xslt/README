@@ -1,0 +1,4 @@
+Because these xsl files are under the themes directory one must create a
+symbolic link from /var/www/html/xsl to this directory. This way the
+apache web server can get to them. The reason is that .htaccess files in
+drupal prevent you from browsing to any of its subdirectories.

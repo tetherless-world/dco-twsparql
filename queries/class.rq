@@ -1,0 +1,29 @@
+<?php
+
+include_once("dco_common.php");
+
+if(isset($_GET["uri"])) {
+  $instance = "<" . sanitize($_GET["uri"],false) . ">";
+}
+else if(isset($_GET["i"])) {
+  $instance = "twi:" . sanitize($_GET["i"]);
+}
+else if(isset($_GET["s"])) {
+  $instance = "dco:" . sanitize($_GET["s"]);
+}
+else {
+  twerror();
+  $instance = "<?=\$instance?>" ;
+}
+
+header("Content-type: text/plain");
+?>
+
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+
+describe ?entity
+where
+{
+  ?entity a <?=$instance?> .
+}
+

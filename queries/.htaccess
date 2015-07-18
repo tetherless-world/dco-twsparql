@@ -1,0 +1,7 @@
+Options +Indexes
+
+AddHandler php5-script rq
+
+RewriteEngine On
+RewriteRule (.+\.rq)s$ $1 [H=application/x-httpd-php-source]
+

@@ -1,0 +1,37 @@
+<?php
+
+include_once("dco_common.php");
+
+if(isset($_GET["uri"])) {
+  $instance = "<" . sanitize($_GET["uri"],false) . ">";
+}
+else {
+  twerror();
+  $instance = "<?=\$instance?>" ;
+}
+
+if(isset($_GET["ry"])) {
+  $ry = "<" . sanitize($_GET["ry"],false) . ">";
+}
+else {
+  $ry = "?ry";
+}
+
+header("Content-type: text/plain");
+?>
+
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX ero: <http://purl.obolibrary.org/obo/>
+
+DESCRIBE ?instrument_id ?instrument_created_by ?instrument_used_by ?related_update <?=$ry?>
+
+WHERE
+{
+      <?=$instance?> vivo:fundingVehicleFor ?instrument_id .
+      ?instrument_id a vivo:Equipment .
+      OPTIONAL{?instrument_id dco:instrumentCreatedBy ?instrument_created_by}
+      OPTIONAL{?instrument_id dco:instrumentUsedBy ?instrument_used_by}
+      OPTIONAL{?instrument_id dco:referencedByUpdate ?related_update . ?related_update dco:forReportingYear <?=$ry?> .}
+}
+

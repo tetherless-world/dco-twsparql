@@ -1,0 +1,12 @@
+; $Id$
+name = TW Sparql
+description = Provides a &lt;sparql&gt; tag that can be used for rendering external SPARQL queries inside of node bodies
+dependencies[] = content
+core = 6.x
+php = 5.2
+
+package = "RDF"
+
+version = "6.x-1.0-dev"
+
+

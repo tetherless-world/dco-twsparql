@@ -1,2 +1,1 @@
-# twcJul2015
-File stash for TWC Summer 2015 Researchers
+# DCO TWSparql module, queries and xslt

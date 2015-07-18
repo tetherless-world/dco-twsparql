@@ -1,0 +1,9 @@
+<?php
+header("Content-type: text/plain");
+?>
+
+SELECT ?s ?p ?o
+WHERE
+{
+      <http://ec2-174-129-201-93.compute-1.amazonaws.com/source/cisco-com/dataset/wcl/user/150031> ?p ?o
+}

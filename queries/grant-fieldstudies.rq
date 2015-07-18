@@ -1,0 +1,49 @@
+<?php
+
+include_once("dco_common.php");
+
+if(isset($_GET["uri"])) {
+  $instance = "<" . sanitize($_GET["uri"],false) . ">";
+}
+else {
+  twerror();
+  $instance = "<?=\$instance?>" ;
+}
+
+if(isset($_GET["ry"])) {
+  $ry = "<" . sanitize($_GET["ry"],false) . ">";
+}
+else {
+  $ry = "?ry";
+}
+
+header("Content-type: text/plain");
+?>
+
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX ero: <http://purl.obolibrary.org/obo/>
+
+describe ?project ?role ?participant ?o1 ?start ?startDate ?end ?endDate <?=$ry?> ?pu ?projpub ?pupub ?site
+WHERE
+{
+      <?=$instance?> vivo:fundingVehicleFor ?project .
+      ?project a dco:FieldStudy .
+      OPTIONAL {
+		{?project vivo:contributingRole ?role .} UNION { ?project ero:BFO_0000055 ?role .}
+	        ?role ero:RO_0000052 ?participant .
+      }
+      OPTIONAL {?project vivo:dateTimeInterval ?o1 .
+                ?o1 vivo:start ?start .
+                ?start vivo:dateTime ?startDate .
+      }
+      OPTIONAL {?project vivo:dateTimeInterval ?o1 .
+                ?o1 vivo:end ?end .
+                ?end vivo:dateTime ?endDate .
+      }
+      OPTIONAL {?project  dco:hasProjectUpdate ?pu . ?pu dco:forReportingYear <?=$ry?> .}
+      OPTIONAL {?pu dco:associatedPublications ?pupub .}
+      OPTIONAL {?project <http://purl.obolibrary.org/obo/RO_0002234> ?projpub .}
+      OPTIONAL {?project dco:hasPhysicalLocation ?site .}
+}
+

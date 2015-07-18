@@ -1,0 +1,32 @@
+<?php
+
+include_once("dco_common.php");
+
+if(isset($_GET["uri"])) {
+  $instance = "<" . sanitize($_GET["uri"],false) . ">";
+}
+else {
+  twerror();
+  $instance = "<?=\$instance?>" ;
+}
+
+if(isset($_GET["ry"])) {
+  $ry = "<" . sanitize($_GET["ry"],false) . ">";
+}
+else {
+  $ry = "";
+}
+
+header("Content-type: text/plain");
+?>
+
+PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+
+DESCRIBE <?=$instance?> <?=$ry?> ?recipient
+WHERE
+{
+      <?=$instance?> dco:grantRecipient ?recipient .
+}
+

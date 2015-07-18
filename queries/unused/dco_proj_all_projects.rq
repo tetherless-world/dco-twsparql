@@ -1,0 +1,67 @@
+<?php
+
+include_once("dco_common.php");
+
+if(isset($_GET["uri"])) {
+  $instance = "<" . sanitize($_GET["uri"],false) . ">";
+}
+else if(isset($_GET["i"])) {
+  $instance = "twi:" . sanitize($_GET["i"]);
+}
+else if(isset($_GET["s"])) {
+  $instance = "tw:" . sanitize($_GET["s"]);
+}
+else {
+  twerror();
+  $instance = "<?=\$instance?>" ;
+}
+
+header("Content-type: text/plain");
+?>
+
+
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX swrl:  <http://www.w3.org/2003/11/swrl#>
+PREFIX swrlb: <http://www.w3.org/2003/11/swrlb#>
+PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
+PREFIX agu-index: <http://deepcarbon.net/ontology/agu-index#>
+PREFIX bibo: <http://purl.org/ontology/bibo/>
+PREFIX c4o: <http://purl.org/spar/c4o/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX dcelem: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX event: <http://purl.org/NET/c4dm/event.owl#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX fabio: <http://purl.org/spar/fabio/>
+PREFIX geo: <http://aims.fao.org/aos/geopolitical.owl#>
+PREFIX pvs: <http://vivoweb.org/ontology/provenance-support#>
+PREFIX ero: <http://purl.obolibrary.org/obo/>
+PREFIX scires: <http://vivoweb.org/ontology/scientific-research#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX vitro-public: <http://vitro.mannlib.cornell.edu/ns/vitro/public#>
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+
+SELECT ?Project ?Project_URI ?Community (GROUP_CONCAT( DISTINCT ?Name ; SEPARATOR = "; ") AS ?Project_Investigators) 
+WHERE
+{
+      {<http://info.deepcarbon.net/individual/d5cb52d9b-cb37-4710-ba50-c47f70fff7b9>  dco:hasProject ?o .} UNION {<http://info.deepcarbon.net/individual/dfe2d75d3-c6a0-4c54-8ea5-ac2c0dbe08e6> dco:hasProject ?o .} UNION {<http://info.deepcarbon.net/individual/d4bc62ea2-aa8e-4789-9838-ce445dae9a78> dco:hasProject ?o .} UNION {<http://info.deepcarbon.net/individual/df96da847-0afa-4325-9dc3-c3282618d1a8> dco:hasProject ?o .} UNION {<http://info.deepcarbon.net/individual/dabfd3954-a572-4cc9-827b-fc7a7324ed82> dco:hasProject ?o .} 
+      ?o rdfs:label ?project .
+      ?communityID dco:hasProject ?o ;
+         rdfs:label ?community .    
+      ?o vivo:description ?description .
+      {?o vivo:contributingRole ?role .} UNION { ?o ero:BFO_0000055 ?role .}
+      ?role ero:RO_0000052 ?participant .
+      ?participant rdfs:label ?name.
+
+      BIND(str(?project) AS ?Project)
+      BIND(str(?o) AS ?Project_URI)
+      BIND(str(?community) AS ?Community)
+      BIND(str(?participant_role) AS ?Role)
+      BIND(str(?name) AS ?Name)
+
+} GROUP BY ?Project ?Project_URI ?Community
+ORDER BY ?Community ?Project
