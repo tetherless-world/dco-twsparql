@@ -4,6 +4,7 @@ PREFIX dco: <http://info.deepcarbon.net/schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 #This query counts the number of publication authors on the DCO website
+#Stephen Moon, July 2015
 SELECT (concat("Total Dataset Countries: ", (COUNT (DISTINCT ?countries))) as ?number) WHERE
 {
 ?dataset a vivo:Dataset.
