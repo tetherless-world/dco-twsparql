@@ -110,7 +110,6 @@ Modified by Stephen Moon for DCO Statistics
 
   <xsl:template match="res:sparql">
 	<xsl:if test="res:head/res:link">
-	  <xsl:call-template name="header"/>
 	</xsl:if>
 
 	<xsl:choose>
