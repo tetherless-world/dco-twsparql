@@ -1,6 +1,7 @@
 PREFIX vivo: <http://vivoweb.org/ontology/core#>
 
 #This query counts the number of datasets available on the DCO website
+#Stephen Moon, July 2015
 SELECT (concat("Total Datasets: ", (COUNT (DISTINCT ?dataset))) as ?number) WHERE
 {
 ?dataset a vivo:Dataset.
