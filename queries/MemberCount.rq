@@ -1,8 +1,7 @@
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-#
 #This query counts all DCO members
-#
+#Stephen Moon, July 2015
 SELECT (concat("Total Members: ", (COUNT (DISTINCT ?user))) as ?number) WHERE
 {
 ?user a foaf:Person;
