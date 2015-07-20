@@ -4,7 +4,7 @@ PREFIX dco: <http://info.deepcarbon.net/schema#>
 #
 #Counts the total number of publications on the DCO website
 #
-SELECT (concat("Total Publications: ", (COUNT(?publication))) as ?number) WHERE
+SELECT (concat("Total Publications: ", (COUNT(DISTINCT ?publication))) as ?number) WHERE
 {
 { ?publication a bibo:Article . } 
 UNION { ?publication a bibo:Book . } 
