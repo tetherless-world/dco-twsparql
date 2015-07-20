@@ -18,7 +18,7 @@ Version 1 : Dave Beckett (DAWG)
 Version 2 : Jeen Broekstra (DAWG)
 Customization for SPARQler: Andy Seaborne
 Customization for TWC: Patrick West
-Modified by Stephen Moon for DCO
+Modified by Stephen Moon for DCO Statistics
 
 > -    <xsl:for-each select="//res:head/res:variable">
 > +    <xsl:for-each select="/res:sparql/res:head/res:variable">
