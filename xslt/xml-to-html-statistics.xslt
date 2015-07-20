@@ -32,15 +32,6 @@ Modified by Stephen Moon for DCO Statistics
 		xmlns:fn="http://www.w3.org/2005/xpath-functions"
 		exclude-result-prefixes="res xsl">
 
-  <xsl:template name="header">
-    <div>
-      <h2>Header</h2>
-      <xsl:for-each select="res:head/res:link"> 
-	<p>Link to <xsl:value-of select="@href"/></p>
-      </xsl:for-each>
-    </div>
-  </xsl:template>
-
   <xsl:template name="boolean-result">
     <div>
       <!--      
