@@ -43,19 +43,16 @@ Modified by Stephen Moon for DCO Statistics
 
 
   <xsl:template name="vb-result">
-    <div>
 <xsl:for-each select="res:results/res:result">
   <xsl:apply-templates select="."/>
 </xsl:for-each>
-    </div>
   </xsl:template>
 
   <xsl:template match="res:result">
     <xsl:variable name="current" select="."/>
     <xsl:for-each select="/res:sparql/res:head/res:variable">
       <xsl:variable name="name" select="@name"/>  
-       
-      <td class="desc"> 
+      
 	<xsl:choose>
 	  <xsl:when test="$current/res:binding[@name=$name]">
 	    <!-- apply template for the correct value type (bnode, uri, literal) -->
@@ -66,7 +63,6 @@ Modified by Stephen Moon for DCO Statistics
 	    <!-- no binding available for this variable in this solution -->
 	  </xsl:otherwise>
 	</xsl:choose>
-      </td>
     </xsl:for-each>
    
   </xsl:template>
