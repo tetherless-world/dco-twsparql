@@ -1,9 +1,8 @@
 PREFIX bibo: <http://purl.org/ontology/bibo/>
 PREFIX dco: <http://info.deepcarbon.net/schema#>
 
-#
 #Counts the total number of publications on the DCO website
-#
+#Stephen Moon, July 2015
 SELECT (concat("Total Publications: ", (COUNT(DISTINCT ?publication))) as ?number) WHERE
 {
 { ?publication a bibo:Article . } 

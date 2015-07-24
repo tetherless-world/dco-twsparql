@@ -1,0 +1,16 @@
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+#This query gets the names of each DCO community and counts the number of users in 
+#each community
+SELECT ?Community (str(COUNT(?user)) as ?Members) WHERE
+{
+    ?user a foaf:Person ;
+    dco:associatedDCOCommunity ?dcocomm.
+    ?dcocomm rdfs:label ?c.
+    BIND(str(?c) as ?Community)
+}
+GROUP BY ?Community
+ORDER BY lcase(?Community)

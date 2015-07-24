@@ -4,6 +4,9 @@
 
 XSLT script to format SPARQL Query Results XML Format into xhtml
 
+This particular script expects a single value and will display just the
+vallue, not the ?var
+
 Copyright © 2004, 2005 World Wide Web Consortium, (Massachusetts
 Institute of Technology, European Research Consortium for
 Informatics and Mathematics, Keio University). All Rights
@@ -18,7 +21,7 @@ Version 1 : Dave Beckett (DAWG)
 Version 2 : Jeen Broekstra (DAWG)
 Customization for SPARQler: Andy Seaborne
 Customization for TWC: Patrick West
-Modified by Stephen Moon for DCO
+Modified by Stephen Moon for DCO Statistics
 
 > -    <xsl:for-each select="//res:head/res:variable">
 > +    <xsl:for-each select="/res:sparql/res:head/res:variable">
@@ -32,15 +35,6 @@ Modified by Stephen Moon for DCO
 		xmlns:fn="http://www.w3.org/2005/xpath-functions"
 		exclude-result-prefixes="res xsl">
 
-  <xsl:template name="header">
-    <div>
-      <h2>Header</h2>
-      <xsl:for-each select="res:head/res:link"> 
-	<p>Link to <xsl:value-of select="@href"/></p>
-      </xsl:for-each>
-    </div>
-  </xsl:template>
-
   <xsl:template name="boolean-result">
     <div>
       <!--      
@@ -52,19 +46,16 @@ Modified by Stephen Moon for DCO
 
 
   <xsl:template name="vb-result">
-    <div>
 <xsl:for-each select="res:results/res:result">
   <xsl:apply-templates select="."/>
 </xsl:for-each>
-    </div>
   </xsl:template>
 
   <xsl:template match="res:result">
     <xsl:variable name="current" select="."/>
     <xsl:for-each select="/res:sparql/res:head/res:variable">
       <xsl:variable name="name" select="@name"/>  
-       
-      <td class="desc"> 
+      
 	<xsl:choose>
 	  <xsl:when test="$current/res:binding[@name=$name]">
 	    <!-- apply template for the correct value type (bnode, uri, literal) -->
@@ -75,7 +66,6 @@ Modified by Stephen Moon for DCO
 	    <!-- no binding available for this variable in this solution -->
 	  </xsl:otherwise>
 	</xsl:choose>
-      </td>
     </xsl:for-each>
    
   </xsl:template>
@@ -118,9 +108,6 @@ Modified by Stephen Moon for DCO
   </xsl:template>
 
   <xsl:template match="res:sparql">
-	<xsl:if test="res:head/res:link">
-	  <xsl:call-template name="header"/>
-	</xsl:if>
 
 	<xsl:choose>
 	  <xsl:when test="res:boolean">
