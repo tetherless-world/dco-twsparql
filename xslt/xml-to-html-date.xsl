@@ -4,6 +4,11 @@
 
 XSLT script to format SPARQL Query Results XML Format into xhtml
 
+This particular version appears to be mis-named. It appears to determine if
+the value of a cell starts with http or https and makes it a link instead of
+just displaying the value. It also truncates headers to 10 characters.
+Perhaps that's supposed to be the date.
+
 Copyright © 2004, 2005 World Wide Web Consortium, (Massachusetts
 Institute of Technology, European Research Consortium for
 Informatics and Mathematics, Keio University). All Rights

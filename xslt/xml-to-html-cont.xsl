@@ -4,6 +4,9 @@
 
 XSLT script to format SPARQL Query Results XML Format into xhtml
 
+This particular version seems to put a comma at the end of each line and
+disables any sort of escaping of values
+
 Copyright © 2004, 2005 World Wide Web Consortium, (Massachusetts
 Institute of Technology, European Research Consortium for
 Informatics and Mathematics, Keio University). All Rights
