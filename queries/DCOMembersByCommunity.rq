@@ -13,4 +13,4 @@ SELECT ?Community (str(COUNT(?user)) as ?Members) WHERE
     BIND(str(?c) as ?Community)
 }
 GROUP BY ?Community
-ORDER BY lcase(?Community)
+ORDER BY DESC(xsd:nonNegativeInteger(?Members))
