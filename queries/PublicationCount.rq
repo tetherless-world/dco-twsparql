@@ -3,11 +3,11 @@ PREFIX dco: <http://info.deepcarbon.net/schema#>
 
 #Counts the total number of publications on the DCO website
 #Stephen Moon, July 2015
-SELECT (concat("Total Publications: ", (COUNT(DISTINCT ?publication))) as ?number) WHERE
+SELECT (str(COUNT(DISTINCT ?publication)) as ?number) WHERE
 {
-{ ?publication a bibo:Article . } 
-UNION { ?publication a bibo:Book . } 
-UNION { ?publication a bibo:DocumentPart . } 
-UNION { ?publication a dco:Poster . } 
-UNION { ?publication a bibo:Thesis . }
+    { ?publication a bibo:Article . } 
+      UNION { ?publication a bibo:Book . } 
+      UNION { ?publication a bibo:DocumentPart . } 
+      UNION { ?publication a dco:Poster . } 
+      UNION { ?publication a bibo:Thesis . }
 }

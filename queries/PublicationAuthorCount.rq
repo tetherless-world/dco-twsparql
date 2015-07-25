@@ -6,14 +6,14 @@ PREFIX bibo: <http://purl.org/ontology/bibo/>
 
 #This query counts the number of publication authors on the DCO website
 #Stephen Moon, July 2015
-SELECT (concat("Total Publication Authors: ", (COUNT (DISTINCT ?authors))) as ?number) WHERE
+SELECT (str(COUNT (DISTINCT ?authors)) as ?number) WHERE
 {
-{ ?publication a bibo:Article . } 
-UNION { ?publication a bibo:Book . } 
-UNION { ?publication a bibo:DocumentPart . } 
-UNION { ?publication a dco:Poster . } 
-UNION { ?publication a bibo:Thesis . }
-?publication vivo:relatedBy ?relatedIDs.
-?relatedIDs vivo:relates ?authors.
-?authors vitro:mostSpecificType foaf:Person.
+    { ?publication a bibo:Article . } 
+      UNION { ?publication a bibo:Book . } 
+      UNION { ?publication a bibo:DocumentPart . } 
+      UNION { ?publication a dco:Poster . } 
+      UNION { ?publication a bibo:Thesis . }
+    ?publication vivo:relatedBy ?relatedIDs.
+    ?relatedIDs vivo:relates ?authors.
+    ?authors vitro:mostSpecificType foaf:Person.
 }
