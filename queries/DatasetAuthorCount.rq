@@ -4,10 +4,10 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
 #This query counts the number of distinct dataset authors on the DCO website
 #Stephen Moon, July 2015
-SELECT (concat("Total Dataset Authors: ", (COUNT (DISTINCT ?dataset))) as ?number) WHERE
+SELECT (str(COUNT (DISTINCT ?dataset)) as ?number) WHERE
 {
-?dataset a vivo:Dataset.
-?dataset vivo:relatedBy ?relatedIDs.
-?relatedIDs vivo:relates ?authors.
-?authors vitro:mostSpecificType foaf:Person.
+    ?dataset a vivo:Dataset.
+    ?dataset vivo:relatedBy ?relatedIDs.
+    ?relatedIDs vivo:relates ?authors.
+    ?authors vitro:mostSpecificType foaf:Person.
 }

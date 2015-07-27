@@ -6,16 +6,16 @@ PREFIX bibo: <http://purl.org/ontology/bibo/>
 
 #This query counts the number of countries whose organizations have publications on the DCO website
 #Stephen Moon, July 2015
-SELECT (concat("Total Publication Countries: ", (COUNT (DISTINCT ?countries))) as ?number) WHERE
+SELECT (str(COUNT (DISTINCT ?countries)) as ?number) WHERE
 {
-{ ?publication a bibo:Article . } 
-UNION { ?publication a bibo:Book . } 
-UNION { ?publication a bibo:DocumentPart . } 
-UNION { ?publication a dco:Poster . } 
-UNION { ?publication a bibo:Thesis . }
-?publication vivo:relatedBy ?relatedIDs.
-?relatedIDs vivo:relates ?authors.
-?authors vitro:mostSpecificType foaf:Person.
-?authors dco:inOrganization ?organization.
-?organization <http://purl.obolibrary.org/obo/RO_0001025> ?countries.
+    { ?publication a bibo:Article . } 
+      UNION { ?publication a bibo:Book . } 
+      UNION { ?publication a bibo:DocumentPart . } 
+      UNION { ?publication a dco:Poster . } 
+      UNION { ?publication a bibo:Thesis . }
+    ?publication vivo:relatedBy ?relatedIDs.
+    ?relatedIDs vivo:relates ?authors.
+    ?authors vitro:mostSpecificType foaf:Person.
+    ?authors dco:inOrganization ?organization.
+    ?organization <http://purl.obolibrary.org/obo/RO_0001025> ?countries.
 }
