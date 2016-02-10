@@ -16,6 +16,7 @@
 
   <xsl:import href="/xslt/grant-common.xsl"/>
   <xsl:import href="/xslt/community-common.xsl"/>
+  <xsl:import href="/xslt/team-common.xsl"/>
   <xsl:import href="/xslt/project-common.xsl"/>
   <xsl:import href="/xslt/pu-common.xsl"/>
   <xsl:import href="/xslt/ry-common.xsl"/>
@@ -87,6 +88,25 @@
 	      <xsl:sort select="rdfs:label"/>
           <xsl:call-template name="place-community-label">
             <xsl:with-param name="community" select="current()"/>
+          </xsl:call-template>
+          <xsl:if test="position() != last()">
+            <xsl:text>; </xsl:text>
+          </xsl:if>
+        </xsl:for-each>
+        <br/>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text></xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+
+    <xsl:choose>
+      <xsl:when test="$node/dco:associatedDCOTeam">
+        <span style="font-weight:bold;">DCO Teams: </span>
+        <xsl:for-each select="$node/dco:associatedDCOTeam">
+	      <xsl:sort select="rdfs:label"/>
+          <xsl:call-template name="place-team-label">
+            <xsl:with-param name="team" select="current()"/>
           </xsl:call-template>
           <xsl:if test="position() != last()">
             <xsl:text>; </xsl:text>
