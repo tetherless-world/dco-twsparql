@@ -6,12 +6,13 @@ PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
 PREFIX dco: <http://info.deepcarbon.net/schema#>
 PREFIX vivo: <http://vivoweb.org/ontology/core#>
 
-DESCRIBE ?grant ?project ?pu ?ry ?community ?recipient
+DESCRIBE ?grant ?project ?pu ?ry ?community ?recipient ?team
 WHERE
 {
       ?grant vitro:mostSpecificType vivo:Grant ;
-          dco:grantRecipient ?recipient ;
-          dco:associatedDCOCommunity ?community .
+          dco:grantRecipient ?recipient .
+      OPTIONAL { ?grant dco:associatedDCOCommunity ?community . }
+      OPTIONAL { ?grant dco:associatedDCOTeam ?team . }
       OPTIONAL {?grant_id vivo:fundingVehicleFor ?project .}
       OPTIONAL {?project dco:hasProjectUpdate ?pu .
                 ?pu dco:forReportingYear ?ry .
