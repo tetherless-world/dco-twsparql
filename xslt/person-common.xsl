@@ -20,5 +20,35 @@
 
   <xsl:key name="vivo:Role-nodes" match="vivo:Role|*[rdf:type/@rdf:resource='&vivo;Role']" use="@rdf:about"/>
   <xsl:key name="foaf:Person-nodes" match="foaf:Person|*[rdf:type/@rdf:resource='&foaf;Person']" use="@rdf:about"/>
+  <xsl:key name="foaf:Agent-nodes" match="foaf:Agent|*[rdf:type/@rdf:resource='&foaf;Agent']" use="@rdf:about"/>
+  <xsl:key name="dco:POC-nodes" match="dco:PointOfContact|*[rdf:type/@rdf:resource='&dco;PointOfContact']" use="@rdf:about"/>
+
+  <xsl:template name="place-pocs">
+    <xsl:param name="entity"/>
+    <xsl:choose>
+      <xsl:when test="$entity/dco:hasPointOfContact">
+        <span style="font-size:120%;">Contact Information:</span>
+        <ul>
+        <xsl:for-each select="key('dco:POC-nodes',$entity/dco:hasPointOfContact/@rdf:resource)">
+          <li>
+          <xsl:call-template name="place-poc">
+            <xsl:with-param name="poc" select="current()"/>
+          </xsl:call-template>
+          </li>
+        </xsl:for-each>
+        </ul>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text> </xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template name="place-poc">
+    <xsl:param name="poc"/>
+    <xsl:variable name="agent" select="key('foaf:Agent-nodes',$poc/dco:hasContact/@rdf:resource)"/>
+    <xsl:variable name="agent_url" select="$agent/@rdf:about"/>
+    <a href="{$agent_url}"><xsl:value-of select="$agent/rdfs:label"/></a><xsl:text>: </xsl:text><xsl:value-of select="$poc/dco:hasContactInformation" disable-output-escaping="yes"/>
+  </xsl:template>
 
 </xsl:stylesheet>

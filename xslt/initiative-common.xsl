@@ -22,11 +22,18 @@
 
   <xsl:key name="dco:InstrumentInitiative-nodes" match="dco:InstrumentInitiative|*[rdf:type/@rdf:resource='&dco;InstrumentInitiative']" use="@rdf:about"/>
 
-  <xsl:template name="place-initiative-label">
+  <xsl:template name="place-initiative-profile-link">
     <xsl:param name="initiative"/>
     <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
     <xsl:variable name="initiativeobj" select="key('dco:InstrumentInitiative-nodes',$initiativeuri)"/>
-    <h3><a href="{$initiativeuri}"><xsl:value-of select="$initiativeobj/rdfs:label"/></a></h3>
+    <h2><a href="{$initiativeuri}"><xsl:value-of select="$initiativeobj/rdfs:label"/></a></h2>
+  </xsl:template>
+
+  <xsl:template name="place-initiative-summary-link">
+    <xsl:param name="initiative"/>
+    <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
+    <xsl:variable name="initiativeobj" select="key('dco:InstrumentInitiative-nodes',$initiativeuri)"/>
+    <h2><a href="/page/instr-initiative?uri={$initiativeuri}"><xsl:value-of select="$initiativeobj/rdfs:label"/></a></h2>
   </xsl:template>
 
   <xsl:template name="place-initiative-description">
