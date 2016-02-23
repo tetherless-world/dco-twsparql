@@ -28,14 +28,19 @@
     <xsl:param name="node"/>
     <xsl:param name="style"/>
 
-    <xsl:variable name="imageuri" select="$node/vp:mainImage/@rdf:resource"/>
-    <xsl:variable name="imageobj" select="key('vp:File-nodes',$imageuri)"/>
+    <xsl:choose>
+      <xsl:when test="$node/vp:mainImage">
+        <xsl:variable name="imageuri" select="$node/vp:mainImage/@rdf:resource"/>
+        <xsl:variable name="imageobj" select="key('vp:File-nodes',$imageuri)"/>
 
-    <xsl:variable name="fileuri" select="$imageobj/vp:downloadLocation/@rdf:resource"/>
-    <xsl:variable name="fileobj" select="key('vp:File-stream',$fileuri)"/>
-    <xsl:variable name="fileloc" select="$fileobj/vp:directDownloadUrl"/>
+        <xsl:variable name="fileuri" select="$imageobj/vp:downloadLocation/@rdf:resource"/>
+        <xsl:variable name="fileobj" select="key('vp:File-stream',$fileuri)"/>
+        <xsl:variable name="fileloc" select="$fileobj/vp:directDownloadUrl"/>
 
-    <a href="http://localhost:8080/vivo{$fileloc}"><img class="framer" src="http://localhost:8080/vivo{$fileloc}" style="{$style}"/></a>
+        <a href="http://localhost:8080/vivo{$fileloc}"><img class="framer" src="https://dco.tw.rpi.edu/vivo{$fileloc}" style="{$style}"/></a>
+      </xsl:when>
+      <xsl:otherwise><xsl:text> </xsl:text></xsl:otherwise>
+    </xsl:choose>
   </xsl:template>
 
 </xsl:stylesheet>

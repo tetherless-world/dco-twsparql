@@ -39,6 +39,7 @@
         <xsl:with-param name="initiative" select="$initiative"/>
       </xsl:call-template>
 
+      <!--
       <xsl:call-template name="place-webpages">
         <xsl:with-param name="node" select="$initiative"/>
       </xsl:call-template>
@@ -50,9 +51,10 @@
       <xsl:call-template name="place-news">
         <xsl:with-param name="node" select="$initiative"/>
       </xsl:call-template>
+      -->
 
       <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
-      <a style="font-size:120%;" href="/page/instr-initiative?uri={$initiativeuri}">More Info...</a>
+      <a style="font-size:120%;" href="/instr-initiative?uri={$initiativeuri}">Details...</a>
     </blockquote>
 
   </xsl:template>
@@ -63,7 +65,7 @@
     <xsl:choose>
       <xsl:when test="$root//dco:InstrumentInitiative|$root//*/rdf:type[@rdf:resource='&dco;InstrumentInitiative']">
 	    <xsl:for-each select="$root//dco:InstrumentInitiative[@rdf:about]|$root//*[rdf:type/@rdf:resource='&dco;InstrumentInitiative' and @rdf:about]">
-	      <xsl:sort select="rdfs:label"/>
+	      <xsl:sort select="dco:importance" order="descending" data-type="number"/>
 	      <xsl:call-template name="instr_initiative-list-item">
 			<xsl:with-param name="admin" select="$admin"/>
 			<xsl:with-param name="initiative" select="current()"/>

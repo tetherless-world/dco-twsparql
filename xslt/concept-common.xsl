@@ -32,7 +32,7 @@
     <xsl:param name="entity"/>
     <xsl:choose>
       <xsl:when test="$entity/vivo:hasSubjectArea">
-        <p>Topics:
+        <p>Studies Of:
         <xsl:for-each select="key('skos:Concept-nodes',$entity/vivo:hasSubjectArea/@rdf:resource)">
           <xsl:sort select="rdfs:label"/>
           <xsl:call-template name="place-concept-profile-link">
