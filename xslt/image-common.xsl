@@ -37,7 +37,7 @@
         <xsl:variable name="fileobj" select="key('vp:File-stream',$fileuri)"/>
         <xsl:variable name="fileloc" select="$fileobj/vp:directDownloadUrl"/>
 
-        <a href="http://localhost:8080/vivo{$fileloc}"><img class="framer" src="https://dco.tw.rpi.edu/vivo{$fileloc}" style="{$style}"/></a>
+        <a href="http://info.deepcarbon.net/vivo{$fileloc}"><img class="framer" src="https://info.deepcarbon.net/vivo{$fileloc}" style="{$style}"/></a>
       </xsl:when>
       <xsl:otherwise><xsl:text> </xsl:text></xsl:otherwise>
     </xsl:choose>

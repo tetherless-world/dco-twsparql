@@ -14,6 +14,7 @@
    xmlns="http://www.w3.org/1999/xhtml">
 
   <xsl:import href="/xslt/person-common.xsl"/>
+  <xsl:import href="/xslt/initiative-common.xsl"/>
 
   <xsl:template name="instr_built-list-item">
     <xsl:param name="admin"/>
@@ -22,6 +23,15 @@
 
     <blockquote>
     <h4 style="font-size:120%;"><xsl:value-of select="$built/rdfs:label"/></h4>
+
+    <xsl:call-template name="place-instrument-description">
+      <xsl:with-param name="instrument" select="$built"/>
+    </xsl:call-template>
+
+    <xsl:call-template name="place-instrument-profile-link">
+      <xsl:with-param name="instrument" select="$built"/>
+    </xsl:call-template>
+
     <xsl:call-template name="place-pocs">
       <xsl:with-param name="entity" select="$built"/>
     </xsl:call-template>
