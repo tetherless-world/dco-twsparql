@@ -26,13 +26,13 @@
   <xsl:template name="place-initiative-profile-link">
     <xsl:param name="initiative"/>
     <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
-    <a href="{$initiativeuri}">Initiative Metadata</a>
+    <div><a href="{$initiativeuri}">Initiative Metadata</a></div>
   </xsl:template>
 
   <xsl:template name="place-instrument-profile-link">
     <xsl:param name="instrument"/>
     <xsl:variable name="instrumenturi" select="$instrument/@rdf:resource|$instrument/@rdf:about"/>
-    <p><a href="{$instrumenturi}">Instrument Metadata</a></p>
+    <div><a href="{$instrumenturi}">Instrument Metadata</a></div>
   </xsl:template>
 
   <xsl:template name="place-initiative-title">
