@@ -50,7 +50,37 @@
     <xsl:variable name="person" select="key('foaf:Person-nodes',$author/vivo:relates/@rdf:resource)"/>
     <xsl:variable name="person_url" select="$person/@rdf:about"/>
     <!--<a href="{$person_url}"><xsl:value-of select="$person/rdfs:label"/></a>-->
-    <xsl:value-of select="$person/rdfs:label"/>
+
+    <xsl:variable name="smallcase" select="'abcdefghijklmnopqrstuvwxyz'" />
+    <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZ'" />
+
+    <xsl:variable name="last" select="substring-before($person/rdfs:label,',')"/>
+    <xsl:variable name="after" select="normalize-space(substring-after($person/rdfs:label,','))"/>
+
+    <xsl:variable name="first">
+      <xsl:choose>
+        <xsl:when test="contains($after,' ')">
+          <xsl:value-of select="substring-before($after,' ')"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:value-of select="$after"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="fi" select="translate(substring($first,1,1),$smallcase,$uppercase)"/>
+
+    <xsl:variable name="mi">
+      <xsl:choose>
+        <xsl:when test="contains($after,' ')">
+          <xsl:value-of select="translate(substring(substring-after($after,' '),1,1),$smallcase,$uppercase)"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text></xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+
+    <xsl:value-of select="$last"/><xsl:text> </xsl:text><xsl:value-of select="$fi"/><xsl:value-of select="$mi"/>
   </xsl:template>
 
   <xsl:template name="place-authors">
@@ -70,6 +100,7 @@
   <xsl:template name="place-citation">
     <xsl:param name="doc"/>
 
+    <p>
     <xsl:call-template name="place-authors">
       <xsl:with-param name="doc" select="$doc"/>
     </xsl:call-template>
@@ -96,6 +127,7 @@
         <xsl:with-param name="doc" select="$doc"/>
       </xsl:call-template>
     </xsl:if>
+    </p>
 
   </xsl:template>
 
@@ -103,7 +135,7 @@
     <xsl:param name="node"/>
       <xsl:choose>
         <xsl:when test="$node/dco:associatedPublication">
-          <p>Publications:</p>
+          <p style="font-weight:bold;">Publications:</p>
           <xsl:for-each select="key('bibo:Document-nodes',$node/dco:associatedPublication/@rdf:resource)">
             <xsl:sort select="rdfs:label"/>
             <xsl:call-template name="place-citation">

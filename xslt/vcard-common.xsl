@@ -32,7 +32,7 @@
           <xsl:variable name="vcarduri" select="$node/obo:ARG_2000028/@rdf:resource"/>
           <xsl:variable name="vcardobj" select="key('vcard:vcard-nodes',$vcarduri)"/>
 
-          <p>Websites:</p>
+          <p style="font-weight:bold;">Websites:</p>
           <xsl:for-each select="$vcardobj/vcard:hasURL">
             <xsl:sort select="vivo:rank"/>
             <xsl:variable name="urluri" select="current()/@rdf:resource"/>
@@ -55,7 +55,7 @@
           <xsl:variable name="vcarduri" select="$node/dco:instrInitiativeNews/@rdf:resource"/>
           <xsl:variable name="vcardobj" select="key('vcard:vcard-nodes',$vcarduri)"/>
 
-          <p>News Articles:</p>
+          <p style="font-weight:bold;">News Articles:</p>
           <xsl:for-each select="$vcardobj/vcard:hasURL">
             <xsl:sort select="vivo:rank"/>
             <xsl:variable name="urluri" select="current()/@rdf:resource"/>
