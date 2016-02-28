@@ -27,33 +27,12 @@ PREFIX vitro-public: <http://vitro.mannlib.cornell.edu/ns/vitro/public#>
 PREFIX vivo: <http://vivoweb.org/ontology/core#>
 PREFIX scires: <http://vivoweb.org/ontology/scientific-research#>
 
-describe ?initiative ?community ?team ?newscard ?newsurl ?webcard ?weburl ?image ?imageloc ?doc ?author_role ?author ?journal where
+describe ?initiative ?image ?imageloc where
 {
     ?initiative a dco:InstrumentInitiative .
-    OPTIONAL { ?initiative dco:associatedDCOCommunity ?community . }
-    OPTIONAL { ?initiative dco:associatedDCOTeam ?team . }
-    OPTIONAL {
-         ?initiative dco:instrInitiativeNews ?newscard .
-         ?newscard vcard:hasURL ?newsurl .
-    }
-    OPTIONAL {
-         ?initiative obo:ARG_2000028 ?webcard .
-         ?webcard vcard:hasURL ?weburl .
-    }
     OPTIONAL {
         ?initiative vitro-public:mainImage ?image .
         ?image vitro-public:downloadLocation ?imageloc .
-    }
-    OPTIONAL {
-        ?initiative dco:associatedPublication ?doc .
-        ?doc vivo:relatedBy ?author_role .
-        ?author_role a vivo:Authorship .
-        ?author_role vivo:relates ?author .
-        ?author a foaf:Person .
-        OPTIONAL {
-            ?doc vivo:hasPublicationVenue ?journal .
-            ?journal a bibo:Journal .
-        }
     }
 }
 

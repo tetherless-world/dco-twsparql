@@ -26,11 +26,6 @@
     <xsl:param name="root"/>
 
     <blockquote style="overflow:auto;">
-      <!--
-      <xsl:call-template name="place-initiative-profile-link">
-        <xsl:with-param name="initiative" select="$initiative"/>
-      </xsl:call-template>
-      -->
       <xsl:call-template name="place-initiative-title">
         <xsl:with-param name="initiative" select="$initiative"/>
       </xsl:call-template>
@@ -43,20 +38,6 @@
       <xsl:call-template name="place-initiative-description">
         <xsl:with-param name="initiative" select="$initiative"/>
       </xsl:call-template>
-
-      <!--
-      <xsl:call-template name="place-webpages">
-        <xsl:with-param name="node" select="$initiative"/>
-      </xsl:call-template>
-
-      <xsl:call-template name="place-dco-citation">
-        <xsl:with-param name="node" select="$initiative"/>
-      </xsl:call-template>
-
-      <xsl:call-template name="place-news">
-        <xsl:with-param name="node" select="$initiative"/>
-      </xsl:call-template>
-      -->
 
       <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
       <p><a style="font-size:120%;" href="/instr-initiative?uri={$initiativeuri}">read more...</a></p>
