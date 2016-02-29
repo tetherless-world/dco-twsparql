@@ -27,7 +27,7 @@
     <xsl:param name="entity"/>
     <xsl:choose>
       <xsl:when test="$entity/dco:hasPointOfContact">
-        <span style="font-size:120%;">Contact Information:</span>
+        <span style="font-weight:bold;font-size:120%;">Contact Information:</span>
         <ul>
         <xsl:for-each select="key('dco:POC-nodes',$entity/dco:hasPointOfContact/@rdf:resource)">
           <li>

@@ -21,12 +21,25 @@
 >
 
   <xsl:key name="dco:InstrumentInitiative-nodes" match="dco:InstrumentInitiative|*[rdf:type/@rdf:resource='&dco;InstrumentInitiative']" use="@rdf:about"/>
+  <xsl:key name="dco:Instrument-nodes" match="dco:Instrument|*[rdf:type/@rdf:resource='&dco;Instrument']" use="@rdf:about"/>
 
   <xsl:template name="place-initiative-profile-link">
     <xsl:param name="initiative"/>
     <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
+    <div><a href="{$initiativeuri}">Initiative Metadata</a></div>
+  </xsl:template>
+
+  <xsl:template name="place-instrument-profile-link">
+    <xsl:param name="instrument"/>
+    <xsl:variable name="instrumenturi" select="$instrument/@rdf:resource|$instrument/@rdf:about"/>
+    <div><a href="{$instrumenturi}">Instrument Metadata</a></div>
+  </xsl:template>
+
+  <xsl:template name="place-initiative-title">
+    <xsl:param name="initiative"/>
+    <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
     <xsl:variable name="initiativeobj" select="key('dco:InstrumentInitiative-nodes',$initiativeuri)"/>
-    <h2><a href="{$initiativeuri}"><xsl:value-of select="$initiativeobj/rdfs:label"/></a></h2>
+    <h2><xsl:value-of select="$initiativeobj/rdfs:label"/></h2>
   </xsl:template>
 
   <xsl:template name="place-initiative-summary-link">
@@ -41,6 +54,13 @@
     <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
     <xsl:variable name="initiativeobj" select="key('dco:InstrumentInitiative-nodes',$initiativeuri)"/>
     <xsl:value-of select="$initiativeobj/vivo:description" disable-output-escaping="yes"/>
+  </xsl:template>
+
+  <xsl:template name="place-instrument-description">
+    <xsl:param name="instrument"/>
+    <xsl:variable name="instrumenturi" select="$instrument/@rdf:resource|$instrument/@rdf:about"/>
+    <xsl:variable name="instrumentobj" select="key('dco:Instrument-nodes',$instrumenturi)"/>
+    <xsl:value-of select="$instrumentobj/vivo:description" disable-output-escaping="yes"/>
   </xsl:template>
 
 </xsl:stylesheet>

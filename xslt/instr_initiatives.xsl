@@ -26,35 +26,21 @@
     <xsl:param name="root"/>
 
     <blockquote style="overflow:auto;">
-      <xsl:call-template name="place-initiative-profile-link">
+      <xsl:call-template name="place-initiative-title">
         <xsl:with-param name="initiative" select="$initiative"/>
       </xsl:call-template>
 
       <xsl:call-template name="place-image">
         <xsl:with-param name="node" select="$initiative"/>
-        <xsl:with-param name="style" select='"max-width:50%;height:auto;float:left;margin:5px 1px;"'/>
+        <xsl:with-param name="style" select='"max-width:30%;height:auto;float:left;margin:5px 1px;"'/>
       </xsl:call-template>
 
       <xsl:call-template name="place-initiative-description">
         <xsl:with-param name="initiative" select="$initiative"/>
       </xsl:call-template>
 
-      <!--
-      <xsl:call-template name="place-webpages">
-        <xsl:with-param name="node" select="$initiative"/>
-      </xsl:call-template>
-
-      <xsl:call-template name="place-dco-citation">
-        <xsl:with-param name="node" select="$initiative"/>
-      </xsl:call-template>
-
-      <xsl:call-template name="place-news">
-        <xsl:with-param name="node" select="$initiative"/>
-      </xsl:call-template>
-      -->
-
       <xsl:variable name="initiativeuri" select="$initiative/@rdf:resource|$initiative/@rdf:about"/>
-      <a style="font-size:120%;" href="/instr-initiative?uri={$initiativeuri}">Details...</a>
+      <p><a style="font-size:120%;" href="/instr-initiative?uri={$initiativeuri}">read more...</a></p>
     </blockquote>
 
   </xsl:template>
