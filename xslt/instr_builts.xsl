@@ -44,7 +44,6 @@
     <xsl:param name="root"/>
     <xsl:choose>
       <xsl:when test="$root//dco:Instrument|$root//*/rdf:type[@rdf:resource='&dco;Instrument']">
-        <h3 style="font-size:120%;">Device Information</h3>
 	    <xsl:for-each select="$root//dco:Instrument[@rdf:about]|$root//*[rdf:type/@rdf:resource='&dco;Instrument' and @rdf:about]">
 	      <xsl:sort select="rdfs:label"/>
 	      <xsl:call-template name="instr_built-list-item">
