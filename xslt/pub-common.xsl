@@ -100,7 +100,20 @@
   <xsl:template name="place-citation">
     <xsl:param name="doc"/>
 
-    <p>
+    <h3 style="margin-top: 0em; margin-bottom: 0em;">
+    <xsl:choose>
+      <xsl:when test="$doc/bibo:doi">
+        <xsl:variable name="doi" select="$doc/bibo:doi"/>
+        <a href="https://dx.doi.org/{$doi}"><xsl:value-of select="$doc/rdfs:label"/></a>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="docuri" select="$doc/@rdf:about"/>
+        <a href="{$docuri}"><xsl:value-of select="$doc/rdfs:label"/></a>
+      </xsl:otherwise>
+    </xsl:choose>
+    </h3>
+
+    <div>
     <xsl:call-template name="place-authors">
       <xsl:with-param name="doc" select="$doc"/>
     </xsl:call-template>
@@ -127,21 +140,23 @@
         <xsl:with-param name="doc" select="$doc"/>
       </xsl:call-template>
     </xsl:if>
-    </p>
+    </div>
 
   </xsl:template>
 
-  <xsl:template name="place-dco-citation">
+  <xsl:template name="place-dco-citations">
     <xsl:param name="node"/>
       <xsl:choose>
         <xsl:when test="$node/dco:associatedPublication">
           <p style="font-weight:bold;">Publications:</p>
+          <div id="findings" style="width:95%">
           <xsl:for-each select="key('bibo:Document-nodes',$node/dco:associatedPublication/@rdf:resource)">
             <xsl:sort select="rdfs:label"/>
             <xsl:call-template name="place-citation">
               <xsl:with-param name="doc" select="current()"/>
             </xsl:call-template>
           </xsl:for-each>
+          </div>
         </xsl:when>
         <xsl:otherwise>
           <p> </p>
