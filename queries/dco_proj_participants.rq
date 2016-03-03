@@ -53,10 +53,11 @@ WHERE
                       rdfs:label ?roleName .
       ?participant dco:hasDcoId ?dcoId;
                       rdfs:label ?name .
+      ?dcoId rdfs:label ?dcoId_l .
       ?participant dco:inOrganization ?org2 .
       ?org2 rdfs:label ?organization .
       BIND(str(?roleName) AS ?Role)
-      BIND(str(?dcoId) AS ?DCO_ID)
+      BIND(str(?dcoId_l) AS ?DCO_ID)
       BIND(str(?name) AS ?Name)
       BIND(str(?organization) AS ?institution)
 }

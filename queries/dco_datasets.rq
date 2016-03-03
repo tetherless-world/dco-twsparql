@@ -53,13 +53,13 @@ WHERE {
 ?dataset a dco:Object ;
         rdfs:label ?l ;
         vitro:mostSpecificType [rdfs:label "Dataset"@en-US] .
-      OPTIONAL { ?dataset dco:hasDcoId ?id . }
+      OPTIONAL { ?dataset dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l . }
       OPTIONAL { ?dataset dco:hasDistribution ?dist_id .}
       OPTIONAL { ?dataset vivo:description ?descrip .}
       OPTIONAL { ?dataset dco:associatedDCOCommunity [rdfs:label ?community] }
       BIND(str(?community) AS ?DCO_Community)
       BIND(str(?l) AS ?Title) .
-      BIND(str(?id) AS ?DCO_ID) .
+      BIND(str(?dcoId_l) AS ?DCO_ID) .
       BIND(str(?descrip) AS ?Description) .
       BIND(str(?dataset) AS ?dataset2) .
 } ORDER BY DESC(?DCO_Community)

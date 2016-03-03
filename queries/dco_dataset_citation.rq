@@ -63,10 +63,10 @@ WHERE
 
     OPTIONAL { <?=$instance?> vivo:dateTimeValue [vivo:dateTime ?date] .}
     OPTIONAL { <?=$instance?> dco:yearOfPublication ?year .}
-    OPTIONAL { <?=$instance?> dco:hasDcoId ?dcoId .}
+    OPTIONAL { <?=$instance?> dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l }
     OPTIONAL { <?=$instance?> vitro:modTime ?modDate .}
     BIND (str(?modDate) AS ?ModDate)
-    BIND (str(?dcoId) AS ?DCO_ID)    
+    BIND (str(?dcoId_l) AS ?DCO_ID)    
     BIND (str(?title) AS ?Title)
     BIND (str(?date) AS ?Date)
     BIND (str(?year) AS ?Year)    

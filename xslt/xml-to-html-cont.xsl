@@ -125,7 +125,14 @@ Fix:
 	    <a href="{$cell-value}"><xsl:value-of select="$cell-value" disable-output-escaping="yes" /></a>
 	  </xsl:when>
       <xsl:otherwise>
-	    <xsl:value-of select="$cell-value" disable-output-escaping="yes" /> <xsl:text>, </xsl:text>
+        <xsl:choose>
+          <xsl:when test="starts-with($cell-value,'11121')">
+            <a href="https://dx.deepcarbon.net/{$cell-value}"><xsl:value-of select="$cell-value"/></a>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="$cell-value" disable-output-escaping="yes" /> <xsl:text>, </xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:otherwise>
     </xsl:choose>
 

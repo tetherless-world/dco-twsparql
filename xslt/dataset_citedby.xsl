@@ -16,7 +16,7 @@
       <xsl:variable name="uri-value">
         <xsl:value-of select="res:literal"/>
       </xsl:variable>
-     <a href="{$uri-value}"><xsl:value-of select="res:literal"/></a>
+     <a href="https://dx.deepcarbon.net/{$uri-value}"><xsl:value-of select="res:literal"/></a>
     </xsl:if>
     <xsl:if test="@name='Article'">
       <br /><strong><xsl:text>Cited by: </xsl:text></strong><xsl:value-of select="res:literal" disable-output-escaping="yes"/><xsl:text>. </xsl:text>

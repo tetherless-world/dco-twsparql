@@ -57,7 +57,7 @@ WHERE {
       {{ ?dcoAuthorID rdfs:label ?dcoAuthor .} UNION 
       { OPTIONAL { ?citedBy dco:authorName ?dcoAuthor }}}
       OPTIONAL { ?citedBy bibo:doi ?doi }
-      OPTIONAL { ?citedBy dco:hasDcoId ?dcoId }
+      OPTIONAL { ?citedBy dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l . }
       OPTIONAL { ?citedBy bibo:presentedAt [rdfs:label ?event]}
       BIND (str(?article) AS ?Article )
       BIND (str(?journal) AS ?Journal )
@@ -66,7 +66,7 @@ WHERE {
       BIND (str(?dcoAuthor) as ?dco_author )
       BIND (str(?doi) as ?DOI1 )
       BIND (str(?doi) as ?DOI2 )
-      BIND (str(?dcoId) as ?DCO_ID )
+      BIND (str(?dcoId_l) as ?DCO_ID )
 }
 GROUP BY ?Article ?DOI1 ?Journal ?Year ?Event ?DOI2 ?DCO_ID
 ORDER BY DESC(?Year) 

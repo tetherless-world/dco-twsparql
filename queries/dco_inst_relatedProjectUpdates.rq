@@ -51,8 +51,8 @@ WHERE
 <http://info.deepcarbon.net/schema#referencedByUpdate> 
 ?referencedByUpdate .
       ?referencedByUpdate rdfs:label ?updateTitle .
-      OPTIONAL { ?referencedByUpdate dco:hasDcoId ?dcoId }
-      BIND(str(?dcoId) AS ?DCO_ID)
+      OPTIONAL { ?referencedByUpdate dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l }
+      BIND(str(?dcoId_l) AS ?DCO_ID)
       BIND(str(?referencedByUpdate) AS ?Update_URI)
       BIND(str(?updateTitle) AS ?Instrument_Referred_To_By)
 }

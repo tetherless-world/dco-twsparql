@@ -50,5 +50,6 @@ SELECT ?DCO_ID
 WHERE
 {
       <?=$instance?> dco:hasDcoId ?dcoId .
-      BIND(str(?dcoId) AS ?DCO_ID)
+      ?dcoId rdfs:label ?dcoId_l .
+      BIND(str(?dcoId_l) AS ?DCO_ID)
 }
