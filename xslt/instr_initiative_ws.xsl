@@ -21,7 +21,7 @@
   <xsl:import href="/xslt/pub-common.xsl"/>
   <xsl:import href="/xslt/concept-common.xsl"/>
 
-  <xsl:template name="instr_initiative">
+  <xsl:template name="instr_initiative_ws">
     <xsl:param name="admin"/>
     <xsl:param name="root"/>
 
@@ -29,53 +29,19 @@
       <xsl:when test="$root//dco:InstrumentInitiative[@rdf:about]|$root//*[rdf:type/@rdf:resource='&dco;InstrumentInitiative' and @rdf:about]">
         <xsl:variable name="initiative" select="$root//dco:InstrumentInitiative[@rdf:about]|$root//*[rdf:type/@rdf:resource='&dco;InstrumentInitiative' and @rdf:about]"/>
 
-        <xsl:call-template name="place-initiative-title">
-          <xsl:with-param name="initiative" select="$initiative"/>
-        </xsl:call-template>
-    
-        <div style="overflow: auto;">
-          <xsl:call-template name="place-image">
-            <xsl:with-param name="node" select="$initiative"/>
-            <xsl:with-param name="style" select='"max-width:30%;height:auto;float:left;margin:5px 1px;"'/>
-          </xsl:call-template>
-    
-          <xsl:call-template name="place-initiative-description">
-            <xsl:with-param name="initiative" select="$initiative"/>
-          </xsl:call-template>
-        </div>
-    
-        <div style="float:clear;">
-          <xsl:call-template name="place-initiative-profile-link">
-            <xsl:with-param name="initiative" select="$initiative"/>
-          </xsl:call-template>
-
-          <!--
           <xsl:call-template name="place-webpages">
             <xsl:with-param name="node" select="$initiative"/>
           </xsl:call-template>
-    
-          <xsl:call-template name="place-dco-citation">
-            <xsl:with-param name="node" select="$initiative"/>
-          </xsl:call-template>
-    
-          <xsl:call-template name="place-news">
-            <xsl:with-param name="node" select="$initiative"/>
-          </xsl:call-template>
-    
-          <xsl:call-template name="place-subject-areas">
-            <xsl:with-param name="entity" select="$initiative"/>
-          </xsl:call-template>
-          -->
-        </div>
+
       </xsl:when>
       <xsl:otherwise>
-        The requested Instrument Initiative does not exist
+        <xsl:text> </xsl:text>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
 
   <xsl:template match="/">
-    <xsl:call-template name="instr_initiative">
+    <xsl:call-template name="instr_initiative_ws">
       <xsl:with-param name="admin" select="false()"/>
       <xsl:with-param name="root" select="/rdf:RDF"/>
     </xsl:call-template>

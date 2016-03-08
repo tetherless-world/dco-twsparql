@@ -21,20 +21,21 @@
     <xsl:param name="built"/>
     <xsl:param name="root"/>
 
-    <blockquote>
+    <!--
     <h4 style="font-size:120%;"><xsl:value-of select="$built/rdfs:label"/></h4>
 
-    <xsl:call-template name="place-instrument-description">
-      <xsl:with-param name="instrument" select="$built"/>
-    </xsl:call-template>
 
     <xsl:call-template name="place-instrument-profile-link">
       <xsl:with-param name="instrument" select="$built"/>
     </xsl:call-template>
-
-    <xsl:call-template name="place-pocs">
-      <xsl:with-param name="entity" select="$built"/>
-    </xsl:call-template>
+    -->
+    <blockquote style="display:block;margin-top: 1em;margin-bottom: 1em;">
+      <xsl:call-template name="place-instrument-description">
+        <xsl:with-param name="instrument" select="$built"/>
+      </xsl:call-template>
+      <xsl:call-template name="place-pocs">
+        <xsl:with-param name="entity" select="$built"/>
+      </xsl:call-template>
     </blockquote>
 
   </xsl:template>
