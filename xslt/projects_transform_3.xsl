@@ -16,7 +16,7 @@
       <xsl:variable name="uri-value">
         <xsl:value-of select="following-sibling::res:binding/res:literal"/>
       </xsl:variable>
-     <a href="http://deepcarbon.net/dco_project_summary?uri={$uri-value}"><xsl:value-of select="res:literal"/></a></h3>
+     <a href="/dco_project_summary?uri={$uri-value}"><xsl:value-of select="res:literal"/></a></h3>
     </xsl:if>
   </xsl:for-each>
    <div>
@@ -40,7 +40,7 @@
       </xsl:variable>
       <xsl:choose>
         <xsl:when test="starts-with($uri-value,'http:') or starts-with($uri-value,'https:')">
-	  <a href="http://deepcarbon.net/dco_project_summary?uri={$uri-value}"><strong><xsl:text>Details...</xsl:text></strong></a>
+	  <a href="/dco_project_summary?uri={$uri-value}"><strong><xsl:text>Details...</xsl:text></strong></a>
 	</xsl:when>
       <xsl:otherwise>
       </xsl:otherwise>

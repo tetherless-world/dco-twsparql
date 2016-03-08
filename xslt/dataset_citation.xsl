@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 
 <xsl:stylesheet version="1.0"
-		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-		xmlns="http://www.w3.org/1999/xhtml"
-		xmlns:res="http://www.w3.org/2005/sparql-results#"
-		xmlns:fn="http://www.w3.org/2005/xpath-functions"
-		exclude-result-prefixes="res xsl">
+        xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:res="http://www.w3.org/2005/sparql-results#"
+        xmlns:fn="http://www.w3.org/2005/xpath-functions"
+        exclude-result-prefixes="res xsl">
 
 <xsl:template match="/">
  <div style="width:95%">
@@ -17,7 +17,7 @@
       <xsl:variable name="uri-value">
         <xsl:value-of select="res:literal"/>
       </xsl:variable>
-     <a href="{$uri-value}"><xsl:value-of select="res:literal"/></a>
+     <a href="https://dx.deepcarbon.net/{$uri-value}"><xsl:value-of select="res:literal"/></a>
     </xsl:if>
      <xsl:if test="@name='Date'">
       <xsl:value-of select="substring(res:literal, 1, 4)"/><xsl:text>. </xsl:text>

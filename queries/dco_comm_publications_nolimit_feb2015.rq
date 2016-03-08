@@ -63,8 +63,8 @@ WHERE {
   OPTIONAL { ?articleID vivo:hasPublicationVenue/rdfs:label ?Journal }
   OPTIONAL { ?articleID dco:yearOfPublication ?year }
   OPTIONAL { ?articleID bibo:doi ?doi }
-  OPTIONAL { ?articleID dco:hasDcoId ?dcoId }
-  BIND (str(?dcoId) AS ?DCO_ID)
+  OPTIONAL { ?articleID dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l . }
+  BIND (str(?dcoId_l) AS ?DCO_ID)
   BIND (str(?doi) as ?DOI1 )
   BIND (str(?doi) as ?DOI2 )
   BIND (str(?year) as ?Year )

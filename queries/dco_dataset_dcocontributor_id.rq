@@ -59,9 +59,10 @@ WHERE
     OPTIONAL { ?authorship vivo:rank ?rank . }
     ?contrib_id rdf:type foaf:Person ;
                 dco:hasDcoId ?dcoId .
-    ?contrib_id rdfs:label ?contrib_name
+    ?dcoId rdfs:label ?dcoId_l .
+    ?contrib_id rdfs:label ?contrib_name .
     BIND(str(?contrib_name) AS ?DCO_Contributor)
-    BIND(str(?dcoId) AS ?DCO_ID)
+    BIND(str(?dcoId_l) AS ?DCO_ID)
 } ORDER BY ?rank
 
 

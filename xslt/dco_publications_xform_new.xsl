@@ -28,7 +28,7 @@
    <xsl:for-each select="res:binding"> 
      <xsl:if test="@name='DCO_ID'">
       <xsl:variable name="dcoid-value"> <xsl:value-of select="res:literal" disable-output-escaping="yes"/> </xsl:variable>
-      <a href="{$dcoid-value}"><xsl:text>Publication Metadata</xsl:text></a>
+      <a href="https://dx.deepcarbon.net/{$dcoid-value}"><xsl:text>Publication Metadata</xsl:text></a>
      </xsl:if>
      <xsl:if test="@name='DOI2'">
       <xsl:variable name="doi-value-2"> <xsl:value-of select="res:literal" disable-output-escaping="yes"/> </xsl:variable>

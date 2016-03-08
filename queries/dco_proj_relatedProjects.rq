@@ -49,8 +49,8 @@ WHERE
 {
        <?=$instance?>  <http://info.deepcarbon.net/schema#relatedProject> ?relatedProject .
       ?relatedProject rdfs:label ?relatedTitle .
-      OPTIONAL { ?relatedProject dco:hasDcoId ?dcoId }
-      BIND(str(?dcoId) AS ?DCO_ID)
+      OPTIONAL { ?relatedProject dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l . }
+      BIND(str(?dcoId_l) AS ?DCO_ID)
       BIND(str(?relatedProject) AS ?Project_URI)
       BIND(str(?relatedTitle) AS ?Related_Projects)
 }

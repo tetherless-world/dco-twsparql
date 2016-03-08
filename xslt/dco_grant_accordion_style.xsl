@@ -16,7 +16,7 @@
       <xsl:variable name="uri-value">
         <xsl:value-of select="following-sibling::res:binding/res:literal"/>
       </xsl:variable>
-     <a href="http://deepcarbon.net/dco_grant_summary?uri={$uri-value}"><xsl:value-of select="res:literal"/></a></p>
+     <a href="/dco_grant_summary?uri={$uri-value}"><xsl:value-of select="res:literal"/></a></p>
     </xsl:if>
   </xsl:for-each>
    <div>
@@ -40,7 +40,7 @@
      <xsl:variable name="uri-value">
         <xsl:value-of select="following-sibling::res:binding/res:literal"/>
       </xsl:variable>
-     <a href="http://deepcarbon.net/dco_project_summary?uri={$uri-value}"><xsl:value-of select="res:literal"/></a></h3>
+     <a href="/dco_project_summary?uri={$uri-value}"><xsl:value-of select="res:literal"/></a></h3>
      <xsl:text>&#xa;</xsl:text>
     </xsl:if>
     </p>

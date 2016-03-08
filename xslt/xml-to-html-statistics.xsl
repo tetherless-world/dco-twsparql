@@ -91,7 +91,14 @@ Modified by Stephen Moon for DCO Statistics
 	    <a href="{$cell-value}"><xsl:value-of select="$cell-value" disable-output-escaping="yes" /></a>
 	  </xsl:when>
       <xsl:otherwise>
-	    <xsl:value-of select="$cell-value" disable-output-escaping="yes" />
+        <xsl:choose>
+          <xsl:when test="starts-with($cell-value,'11121')">
+            <a href="https://dx.deepcarbon.net/{$cell-value}"><xsl:value-of select="$cell-value"/></a>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="$cell-value" disable-output-escaping="yes" />
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:otherwise>
     </xsl:choose>
 

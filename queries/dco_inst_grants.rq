@@ -49,8 +49,8 @@ WHERE
 {
       <?=$instance?> vivo:hasFundingVehicle  ?grant .
       ?grant rdfs:label ?title .
-      OPTIONAL { ?grant dco:hasDcoId ?dcoId }
-      BIND(str(?dcoId) AS ?DCO_ID)
+      OPTIONAL { ?grant dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l }
+      BIND(str(?dcoId_l) AS ?DCO_ID)
       BIND(str(?title) AS ?Related_Grants)
       BIND(str(?grant) AS ?Grant_URI)
 }

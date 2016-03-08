@@ -51,7 +51,7 @@ PREFIX vivo: <http://vivoweb.org/ontology/core#>
 SELECT ?DCO_ID
 WHERE
 {
-      OPTIONAL { <?=$instance?> dco:hasDcoId ?dcoId }
-      BIND(str(?dcoId) AS ?DCO_ID)
+      OPTIONAL { <?=$instance?> dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l . }
+      BIND(str(?dcoId_l) AS ?DCO_ID)
 }
 

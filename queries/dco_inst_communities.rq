@@ -51,8 +51,8 @@ WHERE
 <http://info.deepcarbon.net/schema#associatedDCOCommunity> 
 ?associatedDCOCommunity .
       ?associatedDCOCommunity rdfs:label ?communityTitle .
-      OPTIONAL { ?associatedDCOCommunity dco:hasDcoId ?dcoId }
-      BIND(str(?dcoId) AS ?DCO_ID)
+      OPTIONAL { ?associatedDCOCommunity dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l }
+      BIND(str(?dcoId_l) AS ?DCO_ID)
       BIND(str(?associatedDCOCommunity) AS ?Community_URI)
       BIND(str(?communityTitle) AS ?Associated_Community)
 }

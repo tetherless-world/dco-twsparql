@@ -49,8 +49,8 @@ WHERE
 {
        <?=$instance?>  dco:associatedDCOTeam ?associatedDCOTeam .
       ?associatedDCOTeam rdfs:label ?teamTitle .
-      OPTIONAL { ?associatedDCOTeam dco:hasDcoId ?dcoId }
-      BIND(str(?dcoId) AS ?DCO_ID)
+      OPTIONAL { ?associatedDCOTeam dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l }
+      BIND(str(?dcoId_l) AS ?DCO_ID)
       BIND(str(?associatedDCOTeam) AS ?Team_URI)
       BIND(str(?teamTitle) AS ?Associated_Team)
 }

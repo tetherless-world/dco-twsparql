@@ -49,8 +49,8 @@ WHERE
 {
        <?=$instance?>  <http://info.deepcarbon.net/schema#relatedDataset> ?relatedDataset .
       ?relatedDataset rdfs:label ?relatedTitle .
-      OPTIONAL { ?relatedDataset dco:hasDcoId ?dcoId }
-      BIND(str(?dcoId) AS ?DCO_ID)
+      OPTIONAL { ?relatedDataset dco:hasDcoId ?dcoId . ?dcoId rdfs:label ?dcoId_l . }
+      BIND(str(?dcoId_l) AS ?DCO_ID)
       BIND(str(?relatedTitle) AS ?Related_Datasets)
 }
 ORDER BY DESC(?Related_Datasets)

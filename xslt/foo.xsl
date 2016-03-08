@@ -118,7 +118,14 @@ Fix:
 	    <a href="{$cell-value}"><xsl:value-of select="$cell-value"/></a>
 	  </xsl:when>
       <xsl:otherwise>
-	    <xsl:value-of select="$cell-value"/>
+        <xsl:choose>
+          <xsl:when test="starts-with($cell-value,'11121')">
+            <a href="https://dx.deepcarbon.net/{$cell-value}"><xsl:value-of select="$cell-value"/></a>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="$cell-value"/>
+          </xsl:otherwise>
+        </xsl:choose>
       </xsl:otherwise>
     </xsl:choose>
 
