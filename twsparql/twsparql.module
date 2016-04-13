@@ -436,7 +436,7 @@ function twsparql_make_XSLTuri(&$params, $queryText) {
   global $twsparql_last_referer;
 
   $xsltURI = $params["xslt"]?$params["xslt"]:twsparql_get_xslt();
-  if(FALSE===strpos("http://",$xsltURI)) {
+  if(0!==strpos($xsltURI,"http://") && 0!==strpos($xsltURI,"https://")) {
     $xsltURI = twsparql_rfc_2396(twsparql_get_xsltpath(),$xsltURI);
   }
   if($params["uri"]) {
@@ -464,7 +464,7 @@ function twsparql_process_xslt($xsltURI, $rdf, &$xhtml) {
   $xslt = new DOMDocument();
   $xslt->substituteEntities = TRUE;
   if(!$xslt->load($xsltURI)) {
-    return "<p>TW SPARQL Error: Unable to load the XSL file $xslt</p>";
+    return "<p>TW SPARQL Error: Unable to load the XSL file $xsltURI</p>";
   }
 
   $start = microtime(TRUE);
@@ -647,7 +647,7 @@ function twsparql_get_sparql_result($params) {
   }
 
   $xsltURI = $params["xslt"]?$params["xslt"]:twsparql_get_xslt();
-  if(FALSE===strpos("http://",$xsltURI)) {
+  if(0!==strpos("$xsltURI,http://") && 0!==strpos($xsltURI,"https://")) {
     $xsltURI = twsparql_rfc_2396(twsparql_get_xsltpath(),$xsltURI);
   }
   if($params["uri"]) {
@@ -755,7 +755,7 @@ function twsparql_rfc_2396($base,$path) {
 
 function twsparql_get_query_text($params, &$path) {
   $path = $params["query"];
-  if(0!==strpos($path,"http://")) {
+  if(0!==strpos($path,"http://") && 0!=strpos($path,"https://")) {
     $path = twsparql_rfc_2396(twsparql_get_querypath(),$path);
   }
   if($params["uri"]) {
