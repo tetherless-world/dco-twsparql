@@ -755,7 +755,7 @@ function twsparql_rfc_2396($base,$path) {
 
 function twsparql_get_query_text($params, &$path) {
   $path = $params["query"];
-  if(0!==strpos($path,"http://") && 0!=strpos($path,"https://")) {
+  if(0!==strpos($path,"http://") && 0!==strpos($path,"https://")) {
     $path = twsparql_rfc_2396(twsparql_get_querypath(),$path);
   }
   if($params["uri"]) {
