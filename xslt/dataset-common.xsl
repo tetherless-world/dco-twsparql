@@ -75,7 +75,7 @@
 
   <xsl:template name="place-dataset-authors">
     <xsl:param name="dataset"/>
-    <xsl:for-each select="key('vivo:Creator-nodes',$dataset/vivo:relatedBy/@rdf:resource)">
+    <xsl:for-each select="key('dcodata:Creator-nodes',$dataset/vivo:relatedBy/@rdf:resource)">
       <xsl:sort select="vivo:rank"/>
       <xsl:call-template name="place-dataset-author">
         <xsl:with-param name="creator" select="current()"/>

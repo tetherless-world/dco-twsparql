@@ -29,6 +29,7 @@
   <xsl:import href="/xslt/dcoid-common.xsl"/>
   <xsl:import href="/xslt/prov-common.xsl"/>
   <xsl:import href="/xslt/dtype-common.xsl"/>
+  <xsl:import href="/xslt/time-raw.xsl"/>
 
   <xsl:template name="dataset">
     <xsl:param name="admin"/>
@@ -42,6 +43,21 @@
           <xsl:with-param name="dataset" select="$dataset"/>
           <xsl:with-param name="style" select='"font-weight:bold;font-size:120%;"'/>
         </xsl:call-template>
+
+        <xsl:choose>
+          <xsl:when test="$dataset/dct:issued">
+            <xsl:variable name="yr">
+              <xsl:call-template name="get-year-raw">
+                <xsl:with-param name="dt" select="$dataset/dct:issued"/>
+              </xsl:call-template>
+            </xsl:variable>
+            <xsl:text> (</xsl:text>
+            <xsl:value-of select="$yr"/>
+            <xsl:text>)</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+          </xsl:otherwise>
+        </xsl:choose>
 
         <br/><br/>
 
@@ -63,6 +79,57 @@
           <xsl:with-param name="dataset" select="$dataset"/>
         </xsl:call-template>
 
+
+        <br/>
+        <span style="font-weight:bold;font-size:120%;">Citation: </span>
+        <xsl:call-template name="place-dataset-authors">
+          <xsl:with-param name="dataset" select="$dataset"/>
+        </xsl:call-template>
+        <xsl:choose>
+          <xsl:when test="$dataset/dct:issued">
+            <xsl:variable name="yr">
+              <xsl:call-template name="get-year-raw">
+                <xsl:with-param name="dt" select="$dataset/dct:issued"/>
+              </xsl:call-template>
+            </xsl:variable>
+            <xsl:text> (</xsl:text>
+            <xsl:value-of select="$yr"/>
+            <xsl:text>): </xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text> </xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:choose>
+          <xsl:when test="$dataset/dct:publisher">
+            <xsl:for-each select="key('foaf:Agent-nodes',$dataset/dco:publisher/@rdf:resource)">
+              <xsl:value-of select="current()/rdfs:label"/>
+              <xsl:if test="position() != last()">
+                <xsl:text>, </xsl:text>
+              </xsl:if>
+            </xsl:for-each>
+            <xsl:text>.</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:text> </xsl:text>
+          </xsl:otherwise>
+        </xsl:choose>
+        <xsl:value-of select="$dataset/rdfs:label"/><xsl:text>. </xsl:text>
+        <xsl:choose>
+          <xsl:when test="$dataset/dct:identifier">
+            <xsl:variable name="ident">
+              <xsl:value-of select="$dataset/dct:identifier"/>
+            </xsl:variable>
+            <a href="http://dx.doi.org/{$ident}">$ident</a>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:call-template name="place-metadata-link">
+              <xsl:with-param name="object" select="$dataset"/>
+            </xsl:call-template>
+          </xsl:otherwise>
+        </xsl:choose>
+
+        <br/>
         <xsl:choose>
           <xsl:when test="$dataset/dco:associatedDCOCommunity">
             <br/>
