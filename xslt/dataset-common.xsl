@@ -92,7 +92,7 @@
     <xsl:choose>
       <xsl:when test="key('dcodata:Creator-nodes',$dataset/vivo:relatedBy/@rdf:resource)">
         <br/>
-        <span style="font-weight:bold;font-size:120%;">Dataset Creators:</span>
+        <span style="font-weight:bold;font-size:120%;">Dataset Creators</span>
         <ul>
         <xsl:for-each select="key('dcodata:Creator-nodes',$dataset/vivo:relatedBy/@rdf:resource)">
           <xsl:sort select="vivo:rank"/>
@@ -115,7 +115,7 @@
     <xsl:choose>
       <xsl:when test="key('dcodata:Contributor-nodes',$dataset/vivo:relatedBy/@rdf:resource)">
         <br/>
-        <span style="font-weight:bold;font-size:120%;">Dataset Contributors:</span>
+        <span style="font-weight:bold;font-size:120%;">Dataset Contributors</span>
         <ul>
         <xsl:for-each select="key('dcodata:Contributor-nodes',$dataset/vivo:relatedBy/@rdf:resource)">
           <xsl:sort select="vivo:rank"/>

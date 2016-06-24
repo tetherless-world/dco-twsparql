@@ -41,7 +41,7 @@
 
         <xsl:call-template name="place-dataset-label">
           <xsl:with-param name="dataset" select="$dataset"/>
-          <xsl:with-param name="style" select='"font-weight:bold;font-size:120%;"'/>
+          <xsl:with-param name="style" select='"font-weight:bold;font-size:140%;"'/>
         </xsl:call-template>
 
         <xsl:choose>
@@ -63,8 +63,9 @@
 
         <xsl:choose>
           <xsl:when test="$dataset/dct:description">
-            <xsl:value-of select="$dataset/dct:description"/>
-            <br/>
+            <div style="font-size:120%;">
+              <xsl:value-of select="$dataset/dct:description"/>
+            </div>
           </xsl:when>
           <xsl:otherwise>
             <xsl:text> </xsl:text>
@@ -81,7 +82,8 @@
 
 
         <br/>
-        <span style="font-weight:bold;font-size:120%;">Citation: </span>
+        <span style="font-weight:bold;font-size:120%;">Citation </span>
+        <br/>
         <xsl:call-template name="place-dataset-authors">
           <xsl:with-param name="dataset" select="$dataset"/>
         </xsl:call-template>
@@ -133,7 +135,7 @@
         <xsl:choose>
           <xsl:when test="$dataset/dco:associatedDCOCommunity">
             <br/>
-            <span style="font-weight:bold;font-size:120%;">DCO Communities:</span>
+            <span style="font-weight:bold;font-size:120%;">DCO Communities</span>
             <ul>
             <xsl:for-each select="key('dco:Community-nodes',$dataset/dco:associatedDCOCommunity/@rdf:resource)">
               <li>
@@ -150,7 +152,7 @@
         <xsl:choose>
           <xsl:when test="$dataset/dco:associatedDCOTeam">
             <br/>
-            <span style="font-weight:bold;font-size:120%;">DCO Teams:</span>
+            <span style="font-weight:bold;font-size:120%;">DCO Teams</span>
             <ul>
             <xsl:for-each select="key('dco:Team-nodes',$dataset/dco:associatedDCOTeam/@rdf:resource)">
               <li>
@@ -167,9 +169,9 @@
         <xsl:choose>
           <xsl:when test="$dataset/dcat:theme">
             <br/>
-            <span style="font-weight:bold;font-size:120%;">Subject Areas:</span>
+            <span style="font-weight:bold;font-size:120%;">Subject Areas</span>
             <br/>
-            <div style="text-indent: 20px;">
+            <div>
               <xsl:for-each select="key('skos:Concept-nodes',$dataset/dcat:theme/@rdf:resource)">
                 <xsl:call-template name="place-concept-profile-link">
                   <xsl:with-param name="concept" select="current()"/>
@@ -188,9 +190,9 @@
         <xsl:choose>
           <xsl:when test="$dataset/dco:hasDataType">
             <br/>
-            <span style="font-weight:bold;font-size:120%;">Datatypes:</span>
+            <span style="font-weight:bold;font-size:120%;">Datatypes</span>
             <br/>
-            <div style="text-indent: 20px;">
+            <div>
               <xsl:for-each select="key('dco:DataType-nodes',$dataset/dco:hasDataType/@rdf:resource)">
                 <xsl:call-template name="place-dtype-link">
                   <xsl:with-param name="dtype" select="current()"/>
@@ -209,9 +211,9 @@
         <xsl:choose>
           <xsl:when test="$dataset/prov:wasQuotedFrom">
             <br/>
-            <span style="font-weight:bold;font-size:120%;">Rescued From:</span>
+            <span style="font-weight:bold;font-size:120%;">Rescued From</span>
             <br/>
-            <div style="text-indent: 20px;">
+            <div>
               <xsl:for-each select="key('prov:Entity-nodes',$dataset/prov:wasQuotedFrom/@rdf:resource)">
                 <xsl:call-template name="place-entity-link">
                   <xsl:with-param name="entity" select="current()"/>
@@ -233,20 +235,23 @@
             <span style="font-weight:bold;font-size:120%;">Distributions</span>
             <br/>
             <xsl:for-each select="key('dcodata:Distribution-nodes',$dataset/dcat:distribution/@rdf:resource)">
-              <div style="display:inline-block;margin:20px;border-top:2px solid black;width:100%">
+              <div style="border-top:2px solid black;width:100%">
                 <span style="font-weight:bold;">distribution: </span>
                 <xsl:call-template name="place-distribution-link">
                   <xsl:with-param name="distribution" select="current()"/>
                   <xsl:with-param name="style" select='""'/>
                 </xsl:call-template>
 
-                <div style="display:inline-block;margin:20px;">
+                <div style="display:inline-block;">
                 <xsl:choose>
                   <xsl:when test="current()/dcat:accessURL">
-                    <xsl:for-each select="current()/dcat:accessURL">
+                    Access URL(s)
+                    <ul>
+                      <xsl:for-each select="current()/dcat:accessURL">
                         <xsl:variable name="access" select="current()/@rdf:resource"/>
-                        Access URL: <a href="{$access}"><xsl:value-of select="$access"/></a>
-                    </xsl:for-each>
+                        <li><a href="{$access}"><xsl:value-of select="$access"/></a></li>
+                      </xsl:for-each>
+                    </ul>
                   </xsl:when>
                   <xsl:otherwise>
                     <xsl:text> </xsl:text>
@@ -255,11 +260,13 @@
 
                 <xsl:choose>
                   <xsl:when test="current()/dcat:downloadURL">
-                    <xsl:for-each select="current()/dcat:downloadURL">
+                    Download URL(s)
+                    <ul>
+                      <xsl:for-each select="current()/dcat:downloadURL">
                         <xsl:variable name="download" select="current()/@rdf:resource"/>
-                        <br/>
-                        Download URL: <a href="{$download}"><xsl:value-of select="$download"/></a>
-                    </xsl:for-each>
+                        <li><a href="{$download}"><xsl:value-of select="$download"/></a></li>
+                      </xsl:for-each>
+                    </ul>
                   </xsl:when>
                   <xsl:otherwise>
                     <xsl:text> </xsl:text>
@@ -267,6 +274,11 @@
                 </xsl:choose>
                 </div>
               </div>
+              <xsl:if test="position() = last()">
+                <div style="border-top:2px solid black;width:100%">
+
+                </div>
+              </xsl:if>
             </xsl:for-each>
           </xsl:when>
           <xsl:otherwise>
