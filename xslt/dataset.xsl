@@ -207,6 +207,7 @@
           </xsl:otherwise>
         </xsl:choose>
 
+        <br/>
         <span style="font-weight:bold;">metadata: </span>
         <xsl:call-template name="place-metadata-link">
           <xsl:with-param name="object" select="$dataset"/>
