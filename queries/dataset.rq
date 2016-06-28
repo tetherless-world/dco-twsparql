@@ -1,0 +1,78 @@
+<?php
+
+include_once("dco_common.php");
+
+if(isset($_GET["uri"])) {
+  $instance = "<" . sanitize($_GET["uri"],false) . ">";
+}
+else if(isset($_GET["i"])) {
+  $instance = "twi:" . sanitize($_GET["i"]);
+}
+else if(isset($_GET["s"])) {
+  $instance = "dco:" . sanitize($_GET["s"]);
+}
+else {
+  twerror();
+  $instance = "<?=\$instance?>" ;
+}
+
+header("Content-type: text/plain");
+?>
+
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX vivo: <http://vivoweb.org/ontology/core#>
+PREFIX vitro: <http://vitro.mannlib.cornell.edu/ns/vitro/0.7#>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dco: <http://info.deepcarbon.net/schema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX dcodata: <http://info.deepcarbon.net/data/schema#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+describe <?=$instance?> ?dcoId ?distribution ?community ?team ?concept ?creator_role ?contributor_role ?creator ?contributor ?dtype ?quoted
+where
+{
+  <?=$instance?> vitro:mostSpecificType ?type .
+  <?=$instance?> dco:hasDcoId ?dcoId .
+  OPTIONAL
+  {
+    <?=$instance?> dcat:distribution ?distribution .
+  }
+  OPTIONAL
+  {
+    <?=$instance?> dco:associatedDCOCommunity ?community .
+  }
+  OPTIONAL
+  {
+    <?=$instance?> dco:associatedDCOTeam ?team .
+  }
+  OPTIONAL
+  {
+    <?=$instance?> dcat:theme ?concept .
+  }
+  OPTIONAL
+  {
+    <?=$instance?> vivo:relatedBy ?creator_role .
+    ?creator_role a dcodata:Creator .
+    ?creator_role vivo:relates ?creator .
+    ?creator a foaf:Person .
+  }
+  OPTIONAL
+  {
+    <?=$instance?> vivo:relatedBy ?contributor_role .
+    ?contributor_role a dcodata:Contributor .
+    ?contributor_role vivo:relates ?contributor .
+    ?contributor a foaf:Person .
+  }
+  OPTIONAL
+  {
+    <?=$instance?> dco:hasDataType ?dtype .
+  }
+  OPTIONAL
+  {
+    <?=$instance?> prov:wasQuotedFrom ?quoted .
+  }
+}
+

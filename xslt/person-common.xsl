@@ -23,6 +23,12 @@
   <xsl:key name="foaf:Agent-nodes" match="foaf:Agent|*[rdf:type/@rdf:resource='&foaf;Agent']" use="@rdf:about"/>
   <xsl:key name="dco:POC-nodes" match="dco:PointOfContact|*[rdf:type/@rdf:resource='&dco;PointOfContact']" use="@rdf:about"/>
 
+  <xsl:template name="place-person-link">
+    <xsl:param name="person"/>
+    <xsl:variable name="person_url" select="$person/@rdf:about"/>
+    <a href="{$person_url}"><xsl:value-of select="$person/rdfs:label"/></a>
+  </xsl:template>
+
   <xsl:template name="place-pocs">
     <xsl:param name="entity"/>
     <xsl:choose>
