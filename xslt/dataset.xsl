@@ -241,8 +241,8 @@
                   <xsl:with-param name="distribution" select="current()"/>
                   <xsl:with-param name="style" select='""'/>
                 </xsl:call-template>
+		<br/>
 
-                <div style="display:inline-block;">
                 <xsl:choose>
                   <xsl:when test="current()/dcat:accessURL">
                     Access URL(s)
@@ -272,7 +272,6 @@
                     <xsl:text> </xsl:text>
                   </xsl:otherwise>
                 </xsl:choose>
-                </div>
               </div>
               <xsl:if test="position() = last()">
                 <div style="border-top:2px solid black;width:100%">
